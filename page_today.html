@@ -1,0 +1,231 @@
+<div class="page active" id="page-today">
+  <div class="page-header">
+    <div>
+      <div class="greeting-sub" id="greet-sub">Good morning</div>
+      <h1 class="greeting-line" id="greet-date">Thursday, May 28</h1>
+    </div>
+    <button class="btn btn--ghost btn--sm" onclick="openModal('modal-backfill')">+ Log past session</button>
+  </div>
+
+  <div class="gcols-6040">
+    <div>
+      <!-- Timer -->
+      <div class="card timer-card" id="timer-card">
+        <div id="t-idle">
+          <div class="timer-idle-hint">start a session</div>
+          <div class="field">
+            <label class="fl">Session type</label>
+            <div class="stype-row">
+              <button class="stype-btn active" data-type="Study">📖 Study</button>
+              <button class="stype-btn" data-type="Practice">✏️ Practice</button>
+              <button class="stype-btn" data-type="Review">🔄 Review</button>
+              <button class="stype-btn" data-type="Watch/Listen">🎧 Watch/Listen</button>
+              <button class="stype-btn" data-type="Test">📝 Test</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="fl">Track</label>
+            <select id="track-sel" onchange="loadTopics()">
+              <option value="">— select a track —</option>
+              <option>German A1</option><option>German A2</option>
+              <option>German B1</option><option>German B2</option>
+              <option>IELTS Reading</option><option>IELTS Writing</option>
+              <option>IELTS Listening</option><option>IELTS Speaking</option>
+              <option>IELTS Mock</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="fl">Topics</label>
+            <div class="chip-row" id="topic-chips"><span style="font-size:12px;color:var(--ink3)">Select a track first</span></div>
+          </div>
+          <div class="field">
+            <label class="fl">Notes (optional)</label>
+            <input type="text" id="sess-notes" placeholder="e.g. focused on modal verbs">
+          </div>
+          <button class="btn btn--primary btn--full" onclick="startTimer()">Start session</button>
+        </div>
+
+        <div id="t-active" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span class="timer-track-label"><span class="dot dot--g"></span><span id="t-track-lbl">—</span></span>
+            <span style="font-size:11px;color:var(--ink3)" id="t-type-lbl">📖 Study</span>
+            <button class="cancel-link" onclick="cancelTimer()">cancel</button>
+          </div>
+          <div class="timer-display" id="t-display">00<span class="sep">:</span>00</div>
+          <div class="chip-row" id="t-active-chips" style="justify-content:center;margin-bottom:14px"></div>
+          <button class="btn btn--danger btn--full" style="height:42px" onclick="stopTimer()">Stop &amp; save</button>
+        </div>
+      </div>
+
+      <!-- Reflection -->
+      <div class="card card--gold" style="margin-top:14px">
+        <div style="font-size:13px;font-weight:500;color:var(--gold);margin-bottom:11px">🌙 end-of-day reflection</div>
+        <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">how did today feel?</div>
+        <div class="mood-row" style="display:flex;gap:7px;margin-bottom:11px">
+          <button class="mood-btn" style="flex:1;height:33px;border-radius:var(--radius);border:0.5px solid var(--gold-border);background:none;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gold)">😌 good</button>
+          <button class="mood-btn" style="flex:1;height:33px;border-radius:var(--radius);border:0.5px solid var(--gold-border);background:none;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gold)">😐 okay</button>
+          <button class="mood-btn" style="flex:1;height:33px;border-radius:var(--radius);border:0.5px solid var(--gold-border);background:none;font-size:12px;cursor:pointer;font-family:inherit;color:var(--gold)">😓 tough</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;font-size:12px;color:var(--gold)">
+          Anki done?
+          <button class="chip active" id="anki-yes" onclick="setAnki(true)" style="font-size:11px">yes</button>
+          <button class="chip" id="anki-no" onclick="setAnki(false)" style="font-size:11px">no</button>
+        </div>
+        <textarea id="reflection-notes" placeholder="one-line note about today…" style="margin-bottom:10px"></textarea>
+        <button class="btn btn--full btn--sm" style="background:var(--gold);color:#fff" onclick="saveReflection()">Log reflection</button>
+      </div>
+    </div>
+
+    <div>
+      <!-- Weekly intention -->
+      <div class="card card--green" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:12px;font-weight:500;color:var(--accent)">Weekly intention</div>
+          <button class="btn btn--ghost btn--sm" style="height:26px;font-size:11px;padding:0 10px" onclick="showToast('Edit weekly goals — coming soon')">edit</button>
+        </div>
+        <div style="font-size:12px;color:var(--accent);margin-bottom:6px">German sessions: <strong>4 / 5</strong></div>
+        <div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:80%"></div></div>
+        <div style="font-size:12px;color:var(--accent);margin:8px 0 6px">IELTS Writing: <strong>2 / 3</strong></div>
+        <div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:66%"></div></div>
+      </div>
+
+      <div class="sec-label" style="margin-top:0">today's study</div>
+      <div class="g2" id="today-stats" style="margin-bottom:14px">
+        <div class="sb"><div class="sb-lbl">Loading…</div><div class="sb-val" style="font-size:26px">—</div><div class="sb-unit">min today</div></div>
+      </div>
+
+      <div class="sec-label">recent sessions</div>
+      <div class="card" style="padding:0;overflow:hidden" id="recent-sessions-list">
+        <div style="padding:16px;font-size:12px;color:var(--ink3)">Loading sessions…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: backfill -->
+<div class="modal-backdrop" id="modal-backfill">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Log a past session</div>
+    <div class="field"><label class="fl">Date</label><input type="date" id="bf-date"></div>
+    <div class="g2">
+      <div class="field"><label class="fl">Start time</label><input type="text" id="bf-start" placeholder="09:00"></div>
+      <div class="field"><label class="fl">Duration (minutes)</label><input type="text" id="bf-duration" placeholder="60"></div>
+    </div>
+    <div class="field"><label class="fl">Track</label>
+      <select id="bf-track">
+        <option>German A1</option><option>German A2</option><option>German B1</option><option>German B2</option>
+        <option>IELTS Reading</option><option>IELTS Writing</option><option>IELTS Listening</option><option>IELTS Speaking</option>
+      </select>
+    </div>
+    <div class="field"><label class="fl">Session type</label>
+      <select id="bf-type"><option>📖 Study</option><option>✏️ Practice</option><option>🔄 Review</option><option>🎧 Watch/Listen</option><option>📝 Test</option></select>
+    </div>
+    <div class="field"><label class="fl">Session quality (optional)</label>
+      <div class="quality-row"><span class="qstar" data-q="1">★</span><span class="qstar" data-q="2">★</span><span class="qstar" data-q="3">★</span><span class="qstar" data-q="4">★</span><span class="qstar" data-q="5">★</span></div>
+    </div>
+    <div class="field"><label class="fl">Notes (optional)</label><textarea id="bf-notes" placeholder="what did you cover?"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
+      <button class="btn btn--primary" style="flex:1" onclick="closeModals();showToast('Past session logged ✓')">Save session</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: quality rating (shown after timer stop) -->
+<div class="modal-backdrop" id="modal-quality">
+  <div class="modal" style="padding-bottom:28px">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Session saved — how did it go?</div>
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:14px">Rate your confidence / focus for this session</div>
+      <div class="quality-row">
+        <span class="qstar" data-q="1">★</span><span class="qstar" data-q="2">★</span>
+        <span class="qstar" data-q="3">★</span><span class="qstar" data-q="4">★</span><span class="qstar" data-q="5">★</span>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:8px" id="quality-label">tap a star to rate</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--ghost" onclick="closeModals()">Skip</button>
+      <button class="btn btn--primary" style="flex:1" onclick="saveQualityRating()">Save rating</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let ankiDoneValue = false;
+
+function setAnki(val) {
+  ankiDoneValue = val;
+  document.getElementById('anki-yes').classList.toggle('active', val);
+  document.getElementById('anki-no').classList.toggle('active', !val);
+}
+
+async function saveReflection() {
+  const mood  = document.querySelector('.mood-btn[style*="gold-light"]')?.textContent.replace(/[^\w\s]/g,'').trim() || '';
+  const notes = document.getElementById('reflection-notes').value;
+  try {
+    await api.call('addDailyLogEntry', { mood, ankiDone: ankiDoneValue, notes });
+    showToast('Reflection logged ✓');
+  } catch (e) {
+    showToast('Error saving reflection: ' + e.message);
+  }
+}
+
+async function saveQualityRating() {
+  const active = document.querySelector('#modal-quality .qstar.active');
+  const rating = active ? parseInt(active.dataset.q) : null;
+  if (rating) {
+    try { await api.call('stopSession', { qualityRating: rating }); } catch (e) { /* ignore */ }
+  }
+  closeModals();
+  showToast('Rating saved ✓');
+}
+
+// Load today's stats and recent sessions on page load
+(async function loadTodayData() {
+  try {
+    const todayMin = await api.call('getTodayMinutesByTrack');
+    const container = document.getElementById('today-stats');
+    const entries = Object.entries(todayMin);
+    if (entries.length === 0) {
+      container.innerHTML = '<div class="sb"><div class="sb-lbl">No sessions yet</div><div class="sb-val" style="font-size:20px">—</div><div class="sb-unit">today</div></div>';
+    } else {
+      container.innerHTML = entries.map(([track, mins]) =>
+        `<div class="sb"><div class="sb-lbl">${track}</div><div class="sb-val" style="font-size:26px">${mins}</div><div class="sb-unit">min today</div></div>`
+      ).join('');
+    }
+  } catch (e) { /* keep loading state */ }
+
+  try {
+    const sessions = await api.call('getRecentSessions', 5);
+    const list = document.getElementById('recent-sessions-list');
+    if (!sessions || sessions.length === 0) {
+      list.innerHTML = '<div style="padding:16px;font-size:12px;color:var(--ink3)">No sessions yet — start one above!</div>';
+      return;
+    }
+    const dotColor = t => t.startsWith('German') ? 'g' : 'b';
+    const timeLabel = t => {
+      const d = new Date(t);
+      const today = new Date(); today.setHours(0,0,0,0);
+      const yest  = new Date(today); yest.setDate(yest.getDate()-1);
+      if (d >= today)       return d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      if (d >= yest)        return 'Yesterday';
+      return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    };
+    list.innerHTML = sessions.map(s => `
+      <div class="sess-row">
+        <span class="dot dot--${dotColor(s.track)}" style="margin-top:3px"></span>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+            <span class="sess-track">${s.track}</span>
+            <span style="font-size:11px;color:var(--ink3)">${s.minutesSelfReported || s.durationMin}m</span>
+            <span class="sess-type-badge">${s.sessionType || 'Study'}</span>
+          </div>
+          ${s.notes ? `<div class="sess-meta">${s.notes}</div>` : ''}
+        </div>
+        <span style="font-size:11px;color:var(--ink3);flex-shrink:0">${timeLabel(s.endTime)}</span>
+      </div>`).join('');
+  } catch (e) { /* keep loading state */ }
+})();
+</script>

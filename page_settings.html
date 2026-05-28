@@ -1,0 +1,209 @@
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <div class="page-sub">Profile, phase, subjects, and system configuration</div>
+    </div>
+  </div>
+
+  <div class="gcols-5050">
+    <div>
+      <div class="sec-label" style="margin-top:0">profile</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="settings-row"><div><div class="srow-lbl">Display name</div><div class="srow-sub">shown in app and emails</div></div><input class="srow-in" type="text" id="cfg-user-name" value="Snova"></div>
+        <div class="settings-row"><div><div class="srow-lbl">Owner email</div><div class="srow-sub">Snova's Google account</div></div><input class="srow-in" type="email" id="cfg-owner-email"></div>
+        <div class="settings-row"><div><div class="srow-lbl">Collaborator email</div><div class="srow-sub">Nova's account</div></div><input class="srow-in" type="email" id="cfg-collab-email"></div>
+        <div class="settings-row"><div><div class="srow-lbl">Notification email</div><div class="srow-sub">where nudges are sent</div></div><input class="srow-in" type="email" id="cfg-notif-email"></div>
+      </div>
+      <button class="btn btn--primary btn--sm" style="margin-top:10px" onclick="saveProfile()">Save profile</button>
+
+      <div class="sec-label">subjects / workspaces</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid var(--border)">
+          <div style="font-size:18px">🇩🇪</div>
+          <div style="flex:1"><div class="srow-lbl">German</div><div class="srow-sub">A1 → B2 · 4 levels</div></div>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('Edit German workspace — coming soon')">edit</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid var(--border)">
+          <div style="font-size:18px">📝</div>
+          <div style="flex:1"><div class="srow-lbl">IELTS</div><div class="srow-sub">1 level · 140 topics</div></div>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('Edit IELTS workspace — coming soon')">edit</button>
+        </div>
+      </div>
+
+      <div class="sec-label">behaviour</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="settings-row"><div><div class="srow-lbl">Min session minutes</div><div class="srow-sub">for streak &amp; daily nudge</div></div><input class="srow-in" type="text" id="cfg-min-min" value="15" style="width:80px"></div>
+        <div class="settings-row"><div><div class="srow-lbl">Streak grace days</div><div class="srow-sub">per week before reset</div></div><input class="srow-in" type="text" id="cfg-grace" value="1" style="width:80px"></div>
+        <div class="settings-row"><div><div class="srow-lbl">Stale session hours</div><div class="srow-sub">auto-cancel timer after</div></div><input class="srow-in" type="text" id="cfg-stale" value="4" style="width:80px"></div>
+        <div class="settings-row"><div><div class="srow-lbl">Daily nudge hour</div><div class="srow-sub">24h, NPT</div></div><input class="srow-in" type="text" id="cfg-nudge-hr" value="22" style="width:80px"></div>
+        <div class="settings-row"><div><div class="srow-lbl">Theme</div><div class="srow-sub">auto follows system</div></div>
+          <select class="srow-sel" id="cfg-theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm" style="margin-top:10px" onclick="saveBehaviour()">Save behaviour</button>
+    </div>
+
+    <div>
+      <div class="sec-label" style="margin-top:0">learning phase</div>
+      <div style="margin-bottom:10px">
+        <div class="phase-opt active" data-phase="pre_ielts">
+          <div class="popt-dot"></div>
+          <div><div class="popt-lbl">Pre-IELTS</div><div class="popt-sub">German + IELTS in parallel</div></div>
+        </div>
+        <div class="phase-opt" data-phase="post_ielts_pre_germany">
+          <div class="popt-dot"></div>
+          <div><div class="popt-lbl">Post-IELTS / Pre-Germany</div><div class="popt-sub">German only focus</div></div>
+        </div>
+        <div class="phase-opt" data-phase="in_germany">
+          <div class="popt-dot"></div>
+          <div><div class="popt-lbl">In Germany</div><div class="popt-sub">Immersion mode</div></div>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px">
+        <div class="settings-row"><div><div class="srow-lbl">IELTS test date</div></div><input type="date" id="cfg-ielts-date" value="2026-09-17" style="width:160px;height:32px;font-size:12px"></div>
+        <div class="settings-row"><div><div class="srow-lbl">Expected Germany arrival</div></div><input type="date" id="cfg-germany-date" style="width:160px;height:32px;font-size:12px"></div>
+      </div>
+      <div class="card card--blue" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="font-family:'DM Serif Display',serif;font-size:44px;color:var(--blue);line-height:1" id="settings-countdown">—</div>
+          <div><div style="font-size:13px;font-weight:500;color:var(--blue)">days until IELTS</div><div style="font-size:11px;color:var(--blue);opacity:.7;margin-top:2px" id="settings-ielts-date">17 September 2026</div></div>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm" onclick="savePhase()">Save phase</button>
+
+      <div class="sec-label">export data</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div class="export-option">
+          <div class="export-icon">📥</div>
+          <div style="flex:1"><div class="srow-lbl">Anki deck</div><div class="srow-sub">Topic → front, notes → back</div></div>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('Anki export — coming soon')">Export</button>
+        </div>
+        <div class="export-option">
+          <div class="export-icon">📄</div>
+          <div style="flex:1"><div class="srow-lbl">Markdown checklist</div><div class="srow-sub">All topics as a .md file</div></div>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('Markdown export — coming soon')">Export</button>
+        </div>
+        <div class="export-option">
+          <div class="export-icon">📊</div>
+          <div style="flex:1"><div class="srow-lbl">Sessions CSV</div><div class="srow-sub">All sessions with times</div></div>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('CSV export — coming soon')">Export</button>
+        </div>
+      </div>
+
+      <div class="sec-label">system log</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px" id="system-log-list">
+        <div class="trigger-row"><span class="tr-name">Loading…</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn btn--ghost btn--sm" onclick="rerunRefresh()">Re-run refresh</button>
+        <span style="font-size:11px;color:var(--ink3)" id="app-version">v2.0.0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Populate settings from APP_CONFIG on load
+(function populateSettings() {
+  const c = window.APP_CONFIG || {};
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  set('cfg-user-name',   c.user_name);
+  set('cfg-owner-email', c.owner_email);
+  set('cfg-collab-email',c.collaborator_email);
+  set('cfg-notif-email', c.notification_email);
+  set('cfg-min-min',     c.min_session_minutes);
+  set('cfg-grace',       c.streak_grace_days);
+  set('cfg-stale',       c.stale_session_hours);
+  set('cfg-nudge-hr',    c.daily_check_hour);
+  set('cfg-theme',       c.theme);
+  set('cfg-ielts-date',  c.ielts_test_date);
+  set('cfg-germany-date',c.expected_arrival_germany);
+
+  const activePhase = document.querySelector(`.phase-opt[data-phase="${c.phase}"]`);
+  if (activePhase) {
+    document.querySelectorAll('.phase-opt').forEach(o => o.classList.remove('active'));
+    activePhase.classList.add('active');
+  }
+
+  const d = window.APP_DAYS_IELTS;
+  if (d > 0) document.getElementById('settings-countdown').textContent = d;
+  if (c.ielts_test_date) {
+    const dt = new Date(c.ielts_test_date);
+    document.getElementById('settings-ielts-date').textContent =
+      dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  }
+  if (c.web_app_version) document.getElementById('app-version').textContent = 'v' + c.web_app_version;
+})();
+
+// Load system log
+(async function loadSystemLog() {
+  try {
+    const runs = await api.call('getRecentTriggerRuns');
+    const list = document.getElementById('system-log-list');
+    if (!runs || runs.length === 0) {
+      list.innerHTML = '<div class="trigger-row"><span style="font-size:12px;color:var(--ink3)">No trigger runs yet.</span></div>';
+      return;
+    }
+    const badgeClass = s => ({ok:'badge-ok',sent:'badge-sent',skipped:'badge-skip',error:'badge-warn'}[s]||'badge-skip');
+    list.innerHTML = runs.map(r => `
+      <div class="trigger-row">
+        <span class="tr-name">${r.trigger}</span>
+        <span class="badge ${badgeClass(r.status)}">${r.status}</span>
+        <span class="tr-time">${r.timestamp ? new Date(r.timestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</span>
+      </div>`).join('');
+  } catch (e) { /* silent */ }
+})();
+
+async function saveProfile() {
+  const pairs = [
+    ['user_name',         document.getElementById('cfg-user-name').value],
+    ['owner_email',       document.getElementById('cfg-owner-email').value],
+    ['collaborator_email',document.getElementById('cfg-collab-email').value],
+    ['notification_email',document.getElementById('cfg-notif-email').value],
+  ];
+  try {
+    for (const [k,v] of pairs) await api.call('setConfigValue', k, v);
+    showToast('Profile saved ✓');
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+
+async function saveBehaviour() {
+  const pairs = [
+    ['min_session_minutes', document.getElementById('cfg-min-min').value],
+    ['streak_grace_days',   document.getElementById('cfg-grace').value],
+    ['stale_session_hours', document.getElementById('cfg-stale').value],
+    ['daily_check_hour',    document.getElementById('cfg-nudge-hr').value],
+    ['theme',               document.getElementById('cfg-theme').value],
+  ];
+  try {
+    for (const [k,v] of pairs) await api.call('setConfigValue', k, v);
+    showToast('Behaviour saved ✓');
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+
+async function savePhase() {
+  const active = document.querySelector('.phase-opt.active');
+  const phase  = active ? active.dataset.phase : null;
+  const pairs  = [
+    ['ielts_test_date',          document.getElementById('cfg-ielts-date').value],
+    ['expected_arrival_germany', document.getElementById('cfg-germany-date').value],
+  ];
+  if (phase) pairs.push(['phase', phase]);
+  try {
+    for (const [k,v] of pairs) await api.call('setConfigValue', k, v);
+    showToast('Phase saved ✓');
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+
+async function rerunRefresh() {
+  showToast('Running morning refresh…');
+  try { await api.call('runMorningRefreshNow'); showToast('Refresh complete ✓'); }
+  catch (e) { showToast('Error: ' + e.message); }
+}
+
+function runMorningRefreshNow() {
+  try { morningRefresh && morningRefresh(); } catch(e){}
+  return {success: true};
+}
+</script>
