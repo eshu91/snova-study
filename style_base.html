@@ -1,0 +1,53 @@
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+:root{
+  --ink:#1c1a17;--ink2:#6b6560;--ink3:#a89f95;
+  --bg:#f5f3ef;--surface:#faf9f7;--surface2:#f0ede8;
+  --border:#e2ddd7;--border2:#ccc8c1;
+  --accent:#2d5016;--accent2:#4a7a25;--accent3:#6ea63a;
+  --accent-bg:#ebf4e2;--accent-light:#d4ebbf;
+  --gold:#9e6d1e;--gold-bg:#fdf4e3;--gold-border:#e8c97a;--gold-light:#fceac4;
+  --blue:#1a4580;--blue2:#2d6bcc;--blue-bg:#e6f0fb;--blue-border:#aac8f0;
+  --red:#8c2020;--red2:#c04040;--red-bg:#fbeaea;--red-border:#f0b8b8;
+  --purple:#4a2080;--purple-bg:#f0eafa;--purple-border:#c8a8f0;
+  --teal:#0e6b6b;--teal-bg:#e3f5f5;--teal-border:#8fd4d4;
+  --sidebar-w:240px;--radius:10px;--radius-lg:14px;--radius-xl:20px;
+  font-family:'DM Sans',system-ui,sans-serif;font-size:15px;line-height:1.5;color:var(--ink)
+}
+body{background:var(--bg);display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);height:100vh;position:fixed;top:0;left:0;background:var(--surface);border-right:0.5px solid var(--border2);display:flex;flex-direction:column;z-index:200;overflow:hidden}
+.sb-top{padding:20px 18px 0}
+.sb-wordmark{font-family:'DM Serif Display',serif;font-size:19px;color:var(--accent);letter-spacing:-.3px;line-height:1}
+.sb-wordmark em{color:var(--ink3);font-style:italic}
+.sb-sub{font-size:10px;color:var(--ink3);margin-top:3px}
+.workspace-switcher{margin:14px 0 0;background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:0;overflow:hidden}
+.ws-current{display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer;transition:background .12s}
+.ws-current:hover{background:var(--border)}
+.ws-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ws-name{font-size:13px;font-weight:500;flex:1}
+.ws-arrow{font-size:10px;color:var(--ink3);transition:transform .2s}
+.ws-arrow.open{transform:rotate(180deg)}
+.ws-dropdown{display:none;border-top:0.5px solid var(--border)}
+.ws-dropdown.open{display:block}
+.ws-option{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;font-size:12px;color:var(--ink2);transition:background .1s}
+.ws-option:hover{background:var(--surface2)}
+.ws-option.active{color:var(--accent);font-weight:500}
+.ws-opt-icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.ws-add{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;font-size:12px;color:var(--ink3);border-top:0.5px solid var(--border);transition:background .1s}
+.ws-add:hover{background:var(--surface2);color:var(--accent)}
+.sb-user{padding:14px 18px;border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:9px;margin-top:10px}
+.user-av{width:32px;height:32px;border-radius:50%;background:var(--accent-bg);border:1.5px solid var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--accent);flex-shrink:0}
+.user-name{font-size:12px;font-weight:500}
+.user-role{font-size:10px;color:var(--ink3)}
+.streak-badge{margin-left:auto;background:var(--gold-bg);border:0.5px solid var(--gold-border);border-radius:20px;padding:2px 8px;font-size:11px;color:var(--gold);font-weight:500;white-space:nowrap}
+.sb-nav{flex:1;padding:12px 12px 0;overflow-y:auto}
+.nav-section{font-size:10px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.7px;padding:0 8px;margin:12px 0 5px}
+.nav-section:first-child{margin-top:0}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;color:var(--ink2);font-size:13px;font-weight:400;border:none;background:none;width:100%;font-family:inherit;transition:background .12s,color .12s;text-align:left}
+.nav-item:hover{background:var(--surface2);color:var(--ink)}
+.nav-item.active{background:var(--accent-bg);color:var(--accent);font-weight:500}
+.nav-ic{width:17px;height:17px;opacity:.65;flex-shrink:0}
+.nav-item.active .nav-ic{opacity:1}
+.nav-badge{margin-left:auto;border-radius:20px;padding
+Continue

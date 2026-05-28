@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lernen / track</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<?!= include('style_base') ?>
+<script>
+window.APP_CONFIG       = <?!= JSON.stringify(config) ?>;
+window.APP_DAYS_IELTS   = <?!= daysToIELTS ?>;
+window.APP_USER         = <?!= JSON.stringify(userCtx) ?>;
+window.APP_TRACKS       = <?!= JSON.stringify(allTracks) ?>;
+window.APP_SESSION_TYPES= <?!= JSON.stringify(sessionTypes) ?>;
+window.APP_STATUSES     = <?!= JSON.stringify(statuses) ?>;
+</script>
+</head>
+<body>
+<div class="offline-bar" id="offline-bar">⚠ You're offline — timer still works, changes will sync when reconnected</div>
+<?!= include('partial_nav', {config: config, daysToIELTS: daysToIELTS}) ?>
+<main class="main">
+<?!= include('page_today') ?>
+<?!= include('page_syllabus') ?>
+<?!= include('page_stats') ?>
+<?!= include('page_settings') ?>
+</main>
+<div id="toasts"></div>
+<?!= include('script_api') ?>
+<?!= include('script_app') ?>
+</body>
+</html>
