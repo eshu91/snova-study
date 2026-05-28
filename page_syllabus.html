@@ -1,0 +1,152 @@
+<div class="page" id="page-syllabus">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Syllabus</h1>
+      <div class="page-sub">Browse topics, track status, attach resources</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn--ghost btn--sm" onclick="openModal('modal-import')">⬆ Import CSV</button>
+      <button class="btn btn--primary btn--sm" onclick="openModal('modal-topic-edit')">+ Add topic</button>
+    </div>
+  </div>
+
+  <div class="level-tabs">
+    <button class="ltab active" onclick="setLevel(this)">German A1</button>
+    <button class="ltab dim"    onclick="setLevel(this)">German A2</button>
+    <button class="ltab dim"    onclick="setLevel(this)">German B1</button>
+    <button class="ltab dim"    onclick="setLevel(this)">German B2</button>
+    <button class="ltab"        onclick="setLevel(this)">IELTS</button>
+  </div>
+
+  <div class="syl-toolbar">
+    <input class="syl-search" type="text" placeholder="search topics…" oninput="filterTopics(this.value)">
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3);cursor:pointer;white-space:nowrap">
+      <input type="checkbox" id="show-archived" onchange="showToast('Toggle archived topics — coming soon')"> Show archived
+    </label>
+  </div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+    <button class="chip active" onclick="setCat(this)">All</button>
+    <button class="chip" onclick="setCat(this)">Grammar</button>
+    <button class="chip" onclick="setCat(this)">Vocabulary</button>
+    <button class="chip" onclick="setCat(this)">Speaking</button>
+    <button class="chip" onclick="setCat(this)">Writing</button>
+  </div>
+
+  <div class="g4" style="margin-bottom:20px">
+    <div class="sb"><div class="sb-lbl">total</div><div class="sb-val" style="font-size:24px">31</div><div class="sb-unit">topics in A1</div></div>
+    <div class="sb" style="background:var(--accent-bg);border:0.5px solid var(--accent-light)">
+      <div class="sb-lbl" style="color:var(--accent)">mastered</div>
+      <div class="sb-val" style="font-size:24px;color:var(--accent)">0</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--accent2)"></div></div>
+    </div>
+    <div class="sb" style="background:var(--gold-bg);border:0.5px solid var(--gold-border)">
+      <div class="sb-lbl" style="color:var(--gold)">learning</div>
+      <div class="sb-val" style="font-size:24px;color:var(--gold)">0</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--gold)"></div></div>
+    </div>
+    <div class="sb"><div class="sb-lbl">not started</div><div class="sb-val" style="font-size:24px">31</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--border2)"></div></div>
+    </div>
+  </div>
+
+  <div id="topic-list">
+    <div class="topic-group-lbl">Grammar</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="topic-card" onclick="openModal('modal-topic-edit')">
+        <span class="dot dot--gray"></span>
+        <div style="flex:1;min-width:0"><div class="topic-name">Subject–Verb–Object word order (SVO)</div></div>
+        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
+      </div>
+      <div class="topic-card" onclick="openModal('modal-topic-edit')">
+        <span class="dot dot--gray"></span>
+        <div style="flex:1;min-width:0"><div class="topic-name">Gender of nouns (der / die / das)</div></div>
+        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
+      </div>
+      <div class="topic-card" onclick="openModal('modal-topic-edit')">
+        <span class="dot dot--gray"></span>
+        <div style="flex:1;min-width:0"><div class="topic-name">Modal verbs: können, müssen, wollen</div></div>
+        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
+      </div>
+    </div>
+    <div class="topic-group-lbl">Vocabulary</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="topic-card" onclick="openModal('modal-topic-edit')">
+        <span class="dot dot--gray"></span>
+        <div style="flex:1;min-width:0"><div class="topic-name">Greetings and farewells</div></div>
+        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
+      </div>
+      <div class="topic-card" onclick="openModal('modal-topic-edit')">
+        <span class="dot dot--gray"></span>
+        <div style="flex:1;min-width:0"><div class="topic-name">Days, months, seasons</div></div>
+        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:18px;padding:12px 14px;background:var(--surface2);border-radius:var(--radius);border:0.5px dashed var(--border2)">
+    <div style="font-size:12px;color:var(--ink3)">
+      💡 <strong style="color:var(--ink2)">Blue dot</strong> = has resources &nbsp;·&nbsp;
+      <strong style="color:var(--ink2)">Gold badge</strong> = has unmastered prerequisites &nbsp;·&nbsp;
+      <strong style="color:var(--ink2)">Sparkline</strong> = recent study activity
+    </div>
+  </div>
+</div>
+
+<!-- Modal: topic edit / create -->
+<div class="modal-backdrop" id="modal-topic-edit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit topic</div>
+    <div class="field"><label class="fl">Category</label>
+      <select><option>Grammar</option><option>Vocabulary</option><option>Speaking</option><option>Writing</option><option>Culture/Communication</option></select>
+    </div>
+    <div class="field"><label class="fl">Topic name</label><input type="text" placeholder="e.g. Modal verbs: können, müssen, wollen"></div>
+    <div class="field"><label class="fl">Status</label>
+      <div style="display:flex;gap:8px">
+        <button class="chip active">Not started</button>
+        <button class="chip">Learning</button>
+        <button class="chip">Mastered</button>
+      </div>
+    </div>
+    <div class="field"><label class="fl">Notes</label><textarea placeholder="anything to remember…"></textarea></div>
+    <div class="field"><label class="fl">Resources (link or reference)</label><input type="text" placeholder="https://… or 'Netzwerk A1 p.78'"></div>
+    <div class="field" style="background:var(--purple-bg);border:0.5px solid var(--purple-border);border-radius:var(--radius);padding:12px">
+      <label class="fl" style="color:var(--purple)">Collaborator note (Nova)</label>
+      <textarea placeholder="Leave a note for Snova about this topic…" style="background:transparent;border-color:var(--purple-border)"></textarea>
+    </div>
+    <div class="field"><label class="fl">Prerequisites (topic IDs, comma-separated)</label><input type="text" placeholder="A1-GR-001, A1-GR-002"></div>
+    <div class="modal-footer">
+      <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
+      <button class="btn btn--danger btn--sm" onclick="closeModals();showToast('Topic archived')">Archive</button>
+      <button class="btn btn--primary" style="flex:1" onclick="closeModals();showToast('Topic updated ✓')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: import CSV -->
+<div class="modal-backdrop" id="modal-import">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Import topics from CSV</div>
+    <div class="card card--flat" style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:8px;font-weight:500">Expected format</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);line-height:2">
+        category, topic, status, notes<br>
+        Grammar, Dative case, Not started,<br>
+        Vocabulary, Weather vocab, Learning, Review with Anki
+      </div>
+    </div>
+    <div class="field"><label class="fl">Target level</label>
+      <select><option>German A1</option><option>German A2</option><option>German B1</option><option>IELTS</option></select>
+    </div>
+    <div style="border:1.5px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;margin-bottom:14px" onclick="showToast('File picker — coming soon')">
+      <div style="font-size:22px;margin-bottom:8px">📂</div>
+      <div style="font-size:13px;color:var(--ink2)">Drop CSV file or click to browse</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
+      <button class="btn btn--primary" style="flex:1" onclick="closeModals();showToast('Import — coming soon')">Import</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,290 @@
+<script>
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const p = document.getElementById('page-' + id);
+  if (p) p.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3400);
+}
+
+// ── Modals ────────────────────────────────────────────────────────────────────
+function openModal(id) {
+  closeModals();
+  const m = document.getElementById(id);
+  if (m) m.classList.add('open');
+}
+function closeModals() {
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+}
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModals(); });
+});
+
+// ── Search ────────────────────────────────────────────────────────────────────
+function openSearch() {
+  document.getElementById('search-modal').classList.add('open');
+  setTimeout(() => document.getElementById('search-inp').focus(), 50);
+}
+function closeSearch(e) {
+  if (!e || e.target === document.getElementById('search-modal'))
+    document.getElementById('search-modal').classList.remove('open');
+}
+function doSearch(q) { if (q.trim()) showToast('Search: ' + q + ' — coming soon'); }
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+  if (e.key === 'Escape') { closeModals(); closeSearch(); }
+});
+
+// ── Workspace switcher ────────────────────────────────────────────────────────
+function toggleWsDropdown() {
+  document.getElementById('ws-dropdown').classList.toggle('open');
+  document.getElementById('ws-arrow').classList.toggle('open');
+}
+function switchWorkspace(el, name, icon, bg) {
+  document.querySelectorAll('.ws-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ws-current-name').textContent = name;
+  const ic = document.querySelector('.ws-current .ws-icon');
+  if (ic) { ic.textContent = icon; ic.style.background = bg; }
+  document.getElementById('ws-dropdown').classList.remove('open');
+  document.getElementById('ws-arrow').classList.remove('open');
+  showToast('Switched to ' + name);
+}
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+const TOPIC_CHIPS = {
+  'German A1':       ['Gender of nouns','Modal verbs','Negation: nicht/kein','Present tense','Personal pronouns'],
+  'German A2':       ['Perfekt tense','Dative case','Reflexive verbs','Subordinate clauses'],
+  'German B1':       ['Passive voice','Relative clauses','Infinitive constructions','Plusquamperfekt'],
+  'German B2':       ['Konjunktiv II','Participial phrases','Academic register'],
+  'IELTS Reading':   ['Skimming','True/False/NG','Matching headings','Paraphrase recognition'],
+  'IELTS Writing':   ['Task 1 overview','Trend vocab','Essay structure','Cohesive devices'],
+  'IELTS Listening': ['Identifying numbers','Handling distractors','Form completion'],
+  'IELTS Speaking':  ['Part 1 fluency','Cue card structure','Part 3 discussion'],
+  'IELTS Mock':      ['Full mock test'],
+};
+
+let timerInterval = null;
+let timerSecs     = 0;
+let selTopics     = [];
+let selType       = 'Study';
+
+document.querySelectorAll('.stype-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.stype-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    selType = b.dataset.type;
+  });
+});
+
+function loadTopics() {
+  const track = document.getElementById('track-sel').value;
+  const c     = document.getElementById('topic-chips');
+  selTopics   = [];
+  if (!track) {
+    c.innerHTML = '<span style="font-size:12px;color:var(--ink3)">Select a track first</span>';
+    return;
+  }
+  const topics = TOPIC_CHIPS[track] || [];
+  c.innerHTML = topics.map(t =>
+    `<button class="chip" onclick="toggleTopic(this,'${t.replace(/'/g,"\\'")}')">${t}</button>`
+  ).join('');
+}
+
+function toggleTopic(btn, t) {
+  const i = selTopics.indexOf(t);
+  if (i >= 0) { selTopics.splice(i, 1); btn.classList.remove('active'); }
+  else         { selTopics.push(t);      btn.classList.add('active'); }
+}
+
+async function startTimer() {
+  const track = document.getElementById('track-sel').value;
+  if (!track) { showToast('Please select a track first.'); return; }
+
+  const btn = document.querySelector('#t-idle .btn--primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
+
+  try {
+    const res = await api.call('startSession', {
+      track,
+      topicIds:    selTopics,
+      sessionType: selType,
+      notes:       document.getElementById('sess-notes').value,
+    });
+
+    if (res && res.error) { showToast('Error: ' + res.error); return; }
+
+    document.getElementById('t-idle').style.display   = 'none';
+    document.getElementById('t-active').style.display = 'block';
+    document.getElementById('timer-card').classList.add('running');
+    document.getElementById('t-track-lbl').textContent = track;
+    document.getElementById('t-type-lbl').textContent  = selType;
+    const ac = document.getElementById('t-active-chips');
+    ac.innerHTML = selTopics.map(t => `<span class="chip active">${t}</span>`).join('');
+
+    timerSecs     = 0;
+    timerInterval = setInterval(() => {
+      timerSecs++;
+      const m = String(Math.floor(timerSecs / 60)).padStart(2, '0');
+      const s = String(timerSecs % 60).padStart(2, '0');
+      document.getElementById('t-display').innerHTML = m + '<span class="sep">:</span>' + s;
+    }, 1000);
+  } catch (e) {
+    showToast('Could not start session: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Start session'; }
+  }
+}
+
+async function stopTimer() {
+  clearInterval(timerInterval);
+  const reported = timerSecs < 60 ? 1 : Math.round(timerSecs / 60);
+
+  try {
+    await api.call('stopSession', { minutesSelfReported: reported });
+  } catch (e) {
+    showToast('Warning: session may not have saved. ' + e.message);
+  }
+
+  resetTimerUI();
+  showToast('Session saved — ' + reported + ' min logged');
+  setTimeout(() => openModal('modal-quality'), 400);
+}
+
+async function cancelTimer() {
+  clearInterval(timerInterval);
+  try { await api.call('cancelSession'); } catch (e) { /* silent */ }
+  resetTimerUI();
+}
+
+function resetTimerUI() {
+  timerSecs = 0; selTopics = [];
+  document.getElementById('t-idle').style.display   = 'block';
+  document.getElementById('t-active').style.display = 'none';
+  document.getElementById('timer-card').classList.remove('running');
+  document.getElementById('t-display').innerHTML    = '00<span class="sep">:</span>00';
+  document.getElementById('track-sel').value        = '';
+  document.getElementById('topic-chips').innerHTML  = '<span style="font-size:12px;color:var(--ink3)">Select a track first</span>';
+  document.getElementById('sess-notes').value       = '';
+}
+
+// ── Quality stars ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.qstar').forEach(star => {
+  star.addEventListener('click', function () {
+    const val      = parseInt(this.dataset.q);
+    const siblings = this.closest('.quality-row').querySelectorAll('.qstar');
+    siblings.forEach((s, i) => s.classList.toggle('active', i < val));
+    const lbl    = this.closest('.modal')?.querySelector('#quality-label');
+    const labels = ['','Poor focus','Okay','Good','Very good','Excellent'];
+    if (lbl) lbl.textContent = labels[val] || '';
+  });
+});
+
+// ── Syllabus filters ──────────────────────────────────────────────────────────
+function setLevel(btn) {
+  document.querySelectorAll('.level-tabs .ltab').forEach(b => b.classList.remove('active','dim'));
+  btn.classList.add('active');
+  showToast('Loading ' + btn.textContent.trim() + ' topics…');
+}
+function setCat(btn) {
+  document.querySelectorAll('[onclick*=setCat]').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+}
+function filterTopics(q) {
+  document.querySelectorAll('.topic-card').forEach(c => {
+    const name = c.querySelector('.topic-name')?.textContent.toLowerCase() || '';
+    c.style.display = (!q || name.includes(q.toLowerCase())) ? '' : 'none';
+  });
+}
+
+// ── Phase options ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.phase-opt').forEach(o => {
+  o.addEventListener('click', () => {
+    document.querySelectorAll('.phase-opt').forEach(x => x.classList.remove('active'));
+    o.classList.add('active');
+  });
+});
+
+// ── Heatmap ───────────────────────────────────────────────────────────────────
+(function buildHeatmap() {
+  const wrap = document.getElementById('heatmap');
+  if (!wrap) return;
+  const lvl = [0,0,1,0,2,3,4,2,1,0,0,3,2,4,3,1,0,2,3,2,1,0,0,1,4,3,2,1,0,3];
+  const pat = [0,1,2,1,3,2,4,1,2,3,1,0,2,4,3,2,1,0,3,2,1,4,3,2,1,0,3,4,2,1];
+  for (let i = 0; i < 182; i++) {
+    const cell = document.createElement('div');
+    const mix  = Math.min(4, Math.round((lvl[i % lvl.length] + pat[i % pat.length]) / 2));
+    cell.className = 'hm-cell hm-' + mix;
+    cell.title     = mix * 30 + ' min';
+    wrap.appendChild(cell);
+  }
+})();
+
+// ── Greeting ──────────────────────────────────────────────────────────────────
+(function setGreeting() {
+  const hr = new Date().getHours();
+  const sub = document.getElementById('greet-sub');
+  const dt  = document.getElementById('greet-date');
+  if (sub) sub.textContent = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+  if (dt)  dt.textContent  = new Date().toLocaleDateString('en-GB',
+    {weekday:'long', day:'numeric', month:'long'});
+})();
+
+// ── Online / offline ──────────────────────────────────────────────────────────
+window.addEventListener('offline', () => { document.getElementById('offline-bar').style.display = 'block'; });
+window.addEventListener('online',  () => { document.getElementById('offline-bar').style.display = 'none'; });
+
+// ── Mood buttons ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.mood-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    const row = b.closest('.mood-row');
+    row.querySelectorAll('.mood-btn').forEach(x => {
+      x.style.background = 'none';
+    });
+    b.style.background = 'var(--gold-light)';
+  });
+});
+
+// ── Page init: load real data after render ────────────────────────────────────
+(async function initPage() {
+  // Streak
+  try {
+    const streak = await api.call('getStreak');
+    const badge  = document.getElementById('streak-badge');
+    if (badge) badge.textContent = '🔥 ' + (streak || 0);
+  } catch (e) { /* streak badge stays at — */ }
+
+  // Active session check (timer recovery)
+  try {
+    const active = await api.call('getActiveSession');
+    if (active && active.startTime) {
+      const elapsed = Math.round((Date.now() - new Date(active.startTime)) / 1000);
+      if (elapsed > 0) {
+        document.getElementById('t-idle').style.display   = 'none';
+        document.getElementById('t-active').style.display = 'block';
+        document.getElementById('timer-card').classList.add('running');
+        document.getElementById('t-track-lbl').textContent = active.track || '';
+        document.getElementById('t-type-lbl').textContent  = active.sessionType || 'Study';
+        timerSecs     = elapsed;
+        timerInterval = setInterval(() => {
+          timerSecs++;
+          const m = String(Math.floor(timerSecs / 60)).padStart(2, '0');
+          const s = String(timerSecs % 60).padStart(2, '0');
+          document.getElementById('t-display').innerHTML = m + '<span class="sep">:</span>' + s;
+        }, 1000);
+      }
+    }
+  } catch (e) { /* no active session */ }
+})();
+</script>

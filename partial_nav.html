@@ -1,0 +1,118 @@
+<?
+  var initials = (config.user_name || 'S')
+    .split(' ').map(function(w){return w.charAt(0);}).join('').toUpperCase().slice(0,2);
+  var phaseMap = {
+    pre_ielts:               {label:'Pre-IELTS',     sub:'German + IELTS active'},
+    post_ielts_pre_germany:  {label:'Post-IELTS',    sub:'German only focus'},
+    in_germany:              {label:'In Germany',    sub:'Immersion mode'}
+  };
+  var pi   = phaseMap[config.phase] || phaseMap['pre_ielts'];
+  var days = parseInt(daysToIELTS, 10);
+  var showCd = !isNaN(days) && days > 0 && config.phase === 'pre_ielts';
+?>
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="sb-wordmark">lernen <em>/ track</em></div>
+    <div class="sb-sub">Multi-subject learning tracker</div>
+    <div class="workspace-switcher">
+      <div class="ws-current" onclick="toggleWsDropdown()">
+        <div class="ws-icon" id="ws-icon" style="background:#ebf4e2">🇩🇪</div>
+        <div class="ws-name" id="ws-current-name">German</div>
+        <span class="ws-arrow" id="ws-arrow">▾</span>
+      </div>
+      <div class="ws-dropdown" id="ws-dropdown">
+        <div class="ws-option active" onclick="switchWorkspace(this,'German','🇩🇪','#ebf4e2')">
+          <div class="ws-opt-icon" style="background:#ebf4e2">🇩🇪</div>German
+        </div>
+        <div class="ws-option" onclick="switchWorkspace(this,'IELTS','📝','#e6f0fb')">
+          <div class="ws-opt-icon" style="background:#e6f0fb">📝</div>IELTS
+        </div>
+        <div class="ws-option" onclick="switchWorkspace(this,'Piano','🎹','#f0eafa')">
+          <div class="ws-opt-icon" style="background:#f0eafa">🎹</div>Piano
+        </div>
+        <div class="ws-option" onclick="switchWorkspace(this,'Python','🐍','#e3f5f5')">
+          <div class="ws-opt-icon" style="background:#e3f5f5">🐍</div>Python
+        </div>
+        <div class="ws-add" onclick="showToast('Add new subject — coming soon')">
+          <span style="font-size:14px">+</span> New subject
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-user">
+    <div class="user-av"><?= initials ?></div>
+    <div><div class="user-name"><?= config.user_name ?></div><div class="user-role">owner</div></div>
+    <div class="streak-badge" id="streak-badge">🔥 —</div>
+  </div>
+
+  <button class="sb-search-btn" onclick="openSearch()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <span>Search everything…</span>
+    <span class="sb-search-kbd">⌘K</span>
+  </button>
+
+  <nav class="sb-nav">
+    <div class="nav-section">study</div>
+    <button class="nav-item active" id="nav-today" onclick="showPage('today',this)">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span>Today</span>
+    </button>
+    <button class="nav-item" id="nav-syllabus" onclick="showPage('syllabus',this)">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Syllabus</span>
+    </button>
+    <button class="nav-item" id="nav-stats" onclick="showPage('stats',this)">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Stats</span>
+      <span class="nav-badge nb-gold" id="review-badge" style="display:none">0 reviews</span>
+    </button>
+    <div class="nav-section">manage</div>
+    <button class="nav-item" id="nav-settings" onclick="showPage('settings',this)">
+      <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="phase-pill">
+      <div class="phase-dot"></div>
+      <div><div class="phase-text"><?= pi.label ?></div><div class="phase-sub"><?= pi.sub ?></div></div>
+    </div>
+    <? if (showCd) { ?>
+    <div class="countdown-block">
+      <div class="cd-num"><?= days ?></div>
+      <div>
+        <div class="cd-label">days until IELTS</div>
+        <div style="font-size:9px;color:var(--blue);opacity:.7"><?= config.ielts_test_date ?></div>
+      </div>
+    </div>
+    <? } ?>
+  </div>
+</aside>
+
+<!-- Global search -->
+<div class="search-modal-backdrop" id="search-modal" onclick="closeSearch(event)">
+  <div class="search-modal">
+    <div class="search-input-wrap">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" id="search-inp" placeholder="Search topics, sessions, settings…" oninput="doSearch(this.value)">
+      <span style="font-size:12px;color:var(--ink3);cursor:pointer" onclick="closeSearch()">Esc</span>
+    </div>
+    <div id="search-results">
+      <div class="search-section-lbl">Quick actions</div>
+      <div class="search-result" onclick="closeSearch();showPage('today',document.getElementById('nav-today'))">
+        <div class="search-result-icon" style="background:var(--accent-bg)">📖</div>
+        <div><div class="search-result-name">Start a study session</div><div class="search-result-sub">Go to Today → timer</div></div>
+      </div>
+      <div class="search-result" onclick="closeSearch();openModal('modal-backfill')">
+        <div class="search-result-icon" style="background:var(--surface2)">⏪</div>
+        <div><div class="search-result-name">Log a past session</div><div class="search-result-sub">Backfill a session you forgot to track</div></div>
+      </div>
+      <div class="search-result" onclick="closeSearch();openModal('modal-topic-edit')">
+        <div class="search-result-icon" style="background:var(--surface2)">➕</div>
+        <div><div class="search-result-name">Add a new topic</div><div class="search-result-sub">Add to the current syllabus level</div></div>
+      </div>
+    </div>
+  </div>
+</div>

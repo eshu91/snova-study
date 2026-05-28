@@ -1,0 +1,102 @@
+<div class="page" id="page-stats">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Stats</h1>
+      <div class="page-sub" id="stats-week-label">this week</div>
+    </div>
+  </div>
+
+  <div class="g4" style="margin-bottom:22px">
+    <div class="card"><div class="sb-lbl">total study</div><div class="sb-val">—</div><div class="sb-unit">this week</div></div>
+    <div class="card"><div class="sb-lbl">days studied</div><div class="sb-val">—</div><div class="sb-unit">this week</div></div>
+    <div class="card"><div class="sb-lbl">topics mastered</div><div class="sb-val">—</div><div class="sb-unit">this week</div></div>
+    <div class="card"><div class="sb-lbl">streak</div><div class="sb-val" id="stats-streak">— 🔥</div><div class="sb-unit">days</div></div>
+  </div>
+
+  <div class="sec-label" style="margin-top:0">session types this week</div>
+  <div class="g5" style="margin-bottom:22px">
+    <div class="sb" style="text-align:center"><div style="font-size:18px;margin-bottom:4px">📖</div><div style="font-size:18px;font-weight:500">—</div><div class="sb-unit">Study</div></div>
+    <div class="sb" style="text-align:center"><div style="font-size:18px;margin-bottom:4px">✏️</div><div style="font-size:18px;font-weight:500">—</div><div class="sb-unit">Practice</div></div>
+    <div class="sb" style="text-align:center"><div style="font-size:18px;margin-bottom:4px">🔄</div><div style="font-size:18px;font-weight:500">—</div><div class="sb-unit">Review</div></div>
+    <div class="sb" style="text-align:center"><div style="font-size:18px;margin-bottom:4px">🎧</div><div style="font-size:18px;font-weight:500">—</div><div class="sb-unit">Watch/Listen</div></div>
+    <div class="sb" style="text-align:center"><div style="font-size:18px;margin-bottom:4px">📝</div><div style="font-size:18px;font-weight:500">—</div><div class="sb-unit">Test</div></div>
+  </div>
+
+  <div class="gcols-5050">
+    <div class="card">
+      <div style="font-size:12px;font-weight:500;margin-bottom:12px">minutes by track · last 8 weeks</div>
+      <div class="chart-container">
+        <div class="bar-grp"><div class="bar bar--g" style="height:36%"></div><div class="bar bar--b" style="height:24%"></div></div>
+        <div class="bar-grp"><div class="bar bar--g" style="height:54%"></div><div class="bar bar--b" style="height:36%"></div></div>
+        <div class="bar-grp"><div class="bar bar--g" style="height:42%"></div><div class="bar bar--b" style="height:28%"></div></div>
+        <div class="bar-grp"><div class="bar bar--g" style="height:66%"></div><div class="bar bar--b" style="height:50%"></div></div>
+        <div class="bar-grp"><div class="bar bar--g" style="height:48%"></div><div class="bar bar--b" style="height:60%"></div></div>
+        <div class="bar-grp"><div class="bar bar--g" style="height:70%"></div><div class="bar bar--b" style="height:54%"></div></div>
+        <div class="bar-grp"><div class="bar bar--g" style="height:68%"></div><div class="bar bar--b" style="height:72%"></div></div>
+        <div class="bar-grp"><div class="bar bar--g" style="height:84%"></div><div class="bar bar--b" style="height:66%"></div></div>
+      </div>
+      <div class="chart-labels">
+        <div class="chart-lbl">Apr 2</div><div class="chart-lbl">Apr 9</div><div class="chart-lbl">Apr 16</div><div class="chart-lbl">Apr 23</div>
+        <div class="chart-lbl">Apr 30</div><div class="chart-lbl">May 7</div><div class="chart-lbl">May 14</div><div class="chart-lbl">May 21</div>
+      </div>
+      <div class="legend-row">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--accent2)"></div>German</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--blue2)"></div>IELTS</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:500;margin-bottom:12px">topics mastered per month</div>
+      <div class="mb-wrap">
+        <div class="mb-col"><div class="mb-bar" style="height:5%"></div><div class="mb-lbl">Dec</div></div>
+        <div class="mb-col"><div class="mb-bar" style="height:5%"></div><div class="mb-lbl">Jan</div></div>
+        <div class="mb-col"><div class="mb-bar" style="height:5%"></div><div class="mb-lbl">Feb</div></div>
+        <div class="mb-col"><div class="mb-bar" style="height:5%"></div><div class="mb-lbl">Mar</div></div>
+        <div class="mb-col"><div class="mb-bar" style="height:5%"></div><div class="mb-lbl">Apr</div></div>
+        <div class="mb-col"><div class="mb-bar" style="height:5%"></div><div class="mb-lbl">May</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label">activity heatmap · last 6 months</div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-size:11px;color:var(--ink3);margin-bottom:10px">Each cell = one day. Darker = more minutes studied.</div>
+    <div class="heatmap-wrap" id="heatmap"></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:10px;color:var(--ink3)">
+      less
+      <div style="width:10px;height:10px;border-radius:2px;background:var(--surface2)"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:#c8e6a0"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:#8dcf52"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:#5baa1e"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:#2d5016"></div>
+      more
+    </div>
+  </div>
+
+  <div class="sec-label">weekly intentions</div>
+  <div class="card card--green" style="margin-bottom:14px">
+    <div style="font-size:12px;font-weight:500;color:var(--accent);margin-bottom:12px">Soft goals for this week — no pressure, just visibility</div>
+    <div class="g2">
+      <div><div style="font-size:12px;color:var(--accent);margin-bottom:5px">German sessions <span style="float:right">—/5</span></div><div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:0%"></div></div></div>
+      <div><div style="font-size:12px;color:var(--accent);margin-bottom:5px">IELTS Writing <span style="float:right">—/3</span></div><div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:0%"></div></div></div>
+      <div><div style="font-size:12px;color:var(--accent);margin-bottom:5px">Review sessions <span style="float:right">—/2</span></div><div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:0%"></div></div></div>
+      <div><div style="font-size:12px;color:var(--accent);margin-bottom:5px">Mock test <span style="float:right">—/1</span></div><div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:0%"></div></div></div>
+    </div>
+    <button class="btn btn--ghost btn--sm" style="margin-top:12px;color:var(--accent);border-color:var(--accent-light)" onclick="showToast('Edit weekly intentions — coming soon')">Edit intentions</button>
+  </div>
+
+  <div class="sec-label">review candidates</div>
+  <div style="font-size:11px;color:var(--ink3);margin-bottom:9px">Learning topics not touched in 21+ days</div>
+  <div class="card" id="review-candidates" style="padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="padding:14px;font-size:12px;color:var(--ink3)">No review candidates yet.</div>
+  </div>
+</div>
+
+<script>
+(async function loadStats() {
+  try {
+    const streak = await api.call('getStreak');
+    const el = document.getElementById('stats-streak');
+    if (el) el.textContent = (streak || 0) + ' 🔥';
+  } catch (e) { /* silent */ }
+})();
+</script>
