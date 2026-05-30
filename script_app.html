@@ -133,11 +133,24 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Workspace switcher ────────────────────────────────────────────────────────
+const WORKSPACE_TRACKS = {
+  German: ['German A1', 'German A2', 'German B1', 'German B2'],
+  IELTS:  ['IELTS Reading', 'IELTS Writing', 'IELTS Listening', 'IELTS Speaking', 'IELTS Mock'],
+};
+
+const WORKSPACE_DEFAULT_LEVEL = { German: 'A1', IELTS: 'IELTS' };
+
+window._activeWorkspace = 'German';
+
 function toggleWsDropdown() {
   document.getElementById('ws-dropdown').classList.toggle('open');
   document.getElementById('ws-arrow').classList.toggle('open');
 }
+
 function switchWorkspace(el, name, icon, bg) {
+  window._activeWorkspace = name;
+
+  // Update sidebar UI
   document.querySelectorAll('.ws-option').forEach(o => o.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('ws-current-name').textContent = name;
@@ -145,7 +158,34 @@ function switchWorkspace(el, name, icon, bg) {
   if (ic) { ic.textContent = icon; ic.style.background = bg; }
   document.getElementById('ws-dropdown').classList.remove('open');
   document.getElementById('ws-arrow').classList.remove('open');
-  showToast('Switched to ' + name);
+
+  // Sync timer track dropdown to this workspace
+  _updateTrackDropdown(name);
+
+  // If Syllabus is visible, jump to the workspace's default level
+  const level = WORKSPACE_DEFAULT_LEVEL[name];
+  if (level && document.getElementById('page-syllabus').classList.contains('active')) {
+    if (typeof sylLoad === 'function') sylLoad(level);
+  }
+
+  if (!WORKSPACE_TRACKS[name]) showToast(name + ' — coming soon');
+}
+
+function _updateTrackDropdown(workspace) {
+  const sel    = document.getElementById('track-sel');
+  const tracks = WORKSPACE_TRACKS[workspace];
+  if (!sel || !tracks) return;
+
+  // Reset topic chips
+  selTopics = [];
+  const chips = document.getElementById('topic-chips');
+  if (chips) chips.innerHTML =
+    '<span style="font-size:12px;color:var(--ink3)">Select a track first</span>';
+
+  sel.innerHTML =
+    '<option value="">— select a track —</option>' +
+    tracks.map(t => `<option>${t}</option>`).join('');
+  sel.value = '';
 }
 
 // ── Timer ─────────────────────────────────────────────────────────────────────
@@ -389,4 +429,6 @@ document.querySelectorAll('.mood-btn').forEach(b => {
     }
   } catch (e) { /* no active session */ }
 })();
+// Initialise track dropdown to default workspace on first paint
+_updateTrackDropdown('German');
 </script>

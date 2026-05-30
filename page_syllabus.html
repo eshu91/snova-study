@@ -6,89 +6,61 @@
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn btn--ghost btn--sm" onclick="openModal('modal-import')">⬆ Import CSV</button>
-      <button class="btn btn--primary btn--sm" onclick="openModal('modal-topic-edit')">+ Add topic</button>
+      <button class="btn btn--primary btn--sm" onclick="openNewTopicModal()">+ Add topic</button>
     </div>
   </div>
 
   <div class="level-tabs">
-    <button class="ltab active" onclick="setLevel(this)">German A1</button>
-    <button class="ltab dim"    onclick="setLevel(this)">German A2</button>
-    <button class="ltab dim"    onclick="setLevel(this)">German B1</button>
-    <button class="ltab dim"    onclick="setLevel(this)">German B2</button>
-    <button class="ltab"        onclick="setLevel(this)">IELTS</button>
+    <button class="ltab active" data-level="A1"    onclick="sylLoad('A1')">German A1</button>
+    <button class="ltab"        data-level="A2"    onclick="sylLoad('A2')">German A2</button>
+    <button class="ltab"        data-level="B1"    onclick="sylLoad('B1')">German B1</button>
+    <button class="ltab"        data-level="B2"    onclick="sylLoad('B2')">German B2</button>
+    <button class="ltab"        data-level="IELTS" onclick="sylLoad('IELTS')">IELTS</button>
   </div>
 
   <div class="syl-toolbar">
-    <input class="syl-search" type="text" placeholder="search topics…" oninput="filterTopics(this.value)">
+    <input class="syl-search" type="text" placeholder="search topics…" oninput="sylSearch(this.value)">
     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3);cursor:pointer;white-space:nowrap">
-      <input type="checkbox" id="show-archived" onchange="showToast('Toggle archived topics — coming soon')"> Show archived
+      <input type="checkbox" id="show-archived" onchange="sylRender()"> Show archived
     </label>
   </div>
 
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
-    <button class="chip active" onclick="setCat(this)">All</button>
-    <button class="chip" onclick="setCat(this)">Grammar</button>
-    <button class="chip" onclick="setCat(this)">Vocabulary</button>
-    <button class="chip" onclick="setCat(this)">Speaking</button>
-    <button class="chip" onclick="setCat(this)">Writing</button>
+  <div id="cat-filters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+    <button class="chip active" onclick="setCatFilter('All')">All</button>
   </div>
 
   <div class="g4" style="margin-bottom:20px">
-    <div class="sb"><div class="sb-lbl">total</div><div class="sb-val" style="font-size:24px">31</div><div class="sb-unit">topics in A1</div></div>
+    <div class="sb">
+      <div class="sb-lbl">total</div>
+      <div class="sb-val" style="font-size:24px" id="syl-total">—</div>
+      <div class="sb-unit" id="syl-total-sub">topics</div>
+    </div>
     <div class="sb" style="background:var(--accent-bg);border:0.5px solid var(--accent-light)">
       <div class="sb-lbl" style="color:var(--accent)">mastered</div>
-      <div class="sb-val" style="font-size:24px;color:var(--accent)">0</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--accent2)"></div></div>
+      <div class="sb-val" style="font-size:24px;color:var(--accent)" id="syl-mastered">—</div>
+      <div class="prog-bar"><div class="prog-fill" id="syl-bar-m" style="width:0%;background:var(--accent2)"></div></div>
     </div>
     <div class="sb" style="background:var(--gold-bg);border:0.5px solid var(--gold-border)">
       <div class="sb-lbl" style="color:var(--gold)">learning</div>
-      <div class="sb-val" style="font-size:24px;color:var(--gold)">0</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--gold)"></div></div>
+      <div class="sb-val" style="font-size:24px;color:var(--gold)" id="syl-learning">—</div>
+      <div class="prog-bar"><div class="prog-fill" id="syl-bar-l" style="width:0%;background:var(--gold)"></div></div>
     </div>
-    <div class="sb"><div class="sb-lbl">not started</div><div class="sb-val" style="font-size:24px">31</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--border2)"></div></div>
+    <div class="sb">
+      <div class="sb-lbl">not started</div>
+      <div class="sb-val" style="font-size:24px" id="syl-ns">—</div>
+      <div class="prog-bar"><div class="prog-fill" id="syl-bar-ns" style="width:0%;background:var(--border2)"></div></div>
     </div>
   </div>
 
   <div id="topic-list">
-    <div class="topic-group-lbl">Grammar</div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="topic-card" onclick="openModal('modal-topic-edit')">
-        <span class="dot dot--gray"></span>
-        <div style="flex:1;min-width:0"><div class="topic-name">Subject–Verb–Object word order (SVO)</div></div>
-        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
-      </div>
-      <div class="topic-card" onclick="openModal('modal-topic-edit')">
-        <span class="dot dot--gray"></span>
-        <div style="flex:1;min-width:0"><div class="topic-name">Gender of nouns (der / die / das)</div></div>
-        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
-      </div>
-      <div class="topic-card" onclick="openModal('modal-topic-edit')">
-        <span class="dot dot--gray"></span>
-        <div style="flex:1;min-width:0"><div class="topic-name">Modal verbs: können, müssen, wollen</div></div>
-        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
-      </div>
-    </div>
-    <div class="topic-group-lbl">Vocabulary</div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="topic-card" onclick="openModal('modal-topic-edit')">
-        <span class="dot dot--gray"></span>
-        <div style="flex:1;min-width:0"><div class="topic-name">Greetings and farewells</div></div>
-        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
-      </div>
-      <div class="topic-card" onclick="openModal('modal-topic-edit')">
-        <span class="dot dot--gray"></span>
-        <div style="flex:1;min-width:0"><div class="topic-name">Days, months, seasons</div></div>
-        <span class="topic-time">—</span><span class="pill pill--ns">Not started</span>
-      </div>
-    </div>
+    <div style="padding:20px;font-size:13px;color:var(--ink3)">Loading topics…</div>
   </div>
 
   <div style="margin-top:18px;padding:12px 14px;background:var(--surface2);border-radius:var(--radius);border:0.5px dashed var(--border2)">
     <div style="font-size:12px;color:var(--ink3)">
-      💡 <strong style="color:var(--ink2)">Blue dot</strong> = has resources &nbsp;·&nbsp;
-      <strong style="color:var(--ink2)">Gold badge</strong> = has unmastered prerequisites &nbsp;·&nbsp;
-      <strong style="color:var(--ink2)">Sparkline</strong> = recent study activity
+      💡 <strong style="color:var(--ink2)">Blue dot</strong> = has resources attached &nbsp;·&nbsp;
+      <strong style="color:var(--ink2)">Bar</strong> = total time studied &nbsp;·&nbsp;
+      Tap any topic to edit
     </div>
   </div>
 </div>
@@ -97,29 +69,46 @@
 <div class="modal-backdrop" id="modal-topic-edit">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Edit topic</div>
-    <div class="field"><label class="fl">Category</label>
-      <select><option>Grammar</option><option>Vocabulary</option><option>Speaking</option><option>Writing</option><option>Culture/Communication</option></select>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:18px">
+      <div class="modal-title" style="margin-bottom:0" id="te-title">Edit topic</div>
+      <span style="font-size:10px;color:var(--ink3);font-family:'JetBrains Mono',monospace" id="te-id-label"></span>
     </div>
-    <div class="field"><label class="fl">Topic name</label><input type="text" placeholder="e.g. Modal verbs: können, müssen, wollen"></div>
-    <div class="field"><label class="fl">Status</label>
+    <div class="field">
+      <label class="fl">Category</label>
+      <select id="te-cat"></select>
+    </div>
+    <div class="field">
+      <label class="fl">Topic name</label>
+      <input type="text" id="te-name" placeholder="e.g. Modal verbs: können, müssen, wollen">
+    </div>
+    <div class="field">
+      <label class="fl">Status</label>
       <div style="display:flex;gap:8px">
-        <button class="chip active">Not started</button>
-        <button class="chip">Learning</button>
-        <button class="chip">Mastered</button>
+        <button class="chip te-status-chip active" data-status="Not started">Not started</button>
+        <button class="chip te-status-chip"        data-status="Learning">Learning</button>
+        <button class="chip te-status-chip"        data-status="Mastered">Mastered</button>
       </div>
     </div>
-    <div class="field"><label class="fl">Notes</label><textarea placeholder="anything to remember…"></textarea></div>
-    <div class="field"><label class="fl">Resources (link or reference)</label><input type="text" placeholder="https://… or 'Netzwerk A1 p.78'"></div>
+    <div class="field">
+      <label class="fl">Notes</label>
+      <textarea id="te-notes" placeholder="anything to remember…"></textarea>
+    </div>
+    <div class="field">
+      <label class="fl">Resources (link or reference)</label>
+      <input type="text" id="te-resources" placeholder="https://… or 'Netzwerk A1 p.78'">
+    </div>
     <div class="field" style="background:var(--purple-bg);border:0.5px solid var(--purple-border);border-radius:var(--radius);padding:12px">
       <label class="fl" style="color:var(--purple)">Collaborator note (Nova)</label>
-      <textarea placeholder="Leave a note for Snova about this topic…" style="background:transparent;border-color:var(--purple-border)"></textarea>
+      <textarea id="te-collab" placeholder="Leave a note for Snova about this topic…" style="background:transparent;border-color:var(--purple-border)"></textarea>
     </div>
-    <div class="field"><label class="fl">Prerequisites (topic IDs, comma-separated)</label><input type="text" placeholder="A1-GR-001, A1-GR-002"></div>
+    <div class="field">
+      <label class="fl">Prerequisites (topic IDs, comma-separated)</label>
+      <input type="text" id="te-prereqs" placeholder="A1-GR-001, A1-GR-002">
+    </div>
     <div class="modal-footer">
       <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
-      <button class="btn btn--danger btn--sm" onclick="closeModals();showToast('Topic archived')">Archive</button>
-      <button class="btn btn--primary" style="flex:1" onclick="closeModals();showToast('Topic updated ✓')">Save</button>
+      <button class="btn btn--danger btn--sm" id="te-archive-btn" onclick="sylArchiveTopic()">Archive</button>
+      <button class="btn btn--primary" id="te-save-btn" style="flex:1" onclick="sylSaveTopic()">Save</button>
     </div>
   </div>
 </div>
@@ -137,12 +126,21 @@
         Vocabulary, Weather vocab, Learning, Review with Anki
       </div>
     </div>
-    <div class="field"><label class="fl">Target level</label>
-      <select><option>German A1</option><option>German A2</option><option>German B1</option><option>IELTS</option></select>
+    <div class="field">
+      <label class="fl">Target level</label>
+      <select id="import-level">
+        <option value="A1">German A1</option>
+        <option value="A2">German A2</option>
+        <option value="B1">German B1</option>
+        <option value="B2">German B2</option>
+        <option value="IELTS">IELTS</option>
+      </select>
     </div>
-    <div style="border:1.5px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;margin-bottom:14px" onclick="showToast('File picker — coming soon')">
+    <div style="border:1.5px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;margin-bottom:14px"
+         onclick="showToast('File import — coming soon')">
       <div style="font-size:22px;margin-bottom:8px">📂</div>
       <div style="font-size:13px;color:var(--ink2)">Drop CSV file or click to browse</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:4px">Or paste a URL to a Google Sheets CSV export</div>
     </div>
     <div class="modal-footer">
       <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
@@ -150,3 +148,369 @@
     </div>
   </div>
 </div>
+
+<script>
+// ── State (var avoids any TDZ risk across load order) ─────────────────────────
+var _sLevel   = 'A1';
+var _sTopics  = [];
+var _sMpt     = {};
+var _sTopicId = null;
+var _sCat     = 'All';
+var _sQuery   = '';
+var _sylLoaded = false;
+
+// ── Category lists ────────────────────────────────────────────────────────────
+var _GERMAN_CATS = [
+  'Grammar', 'Vocabulary', 'Reading', 'Writing',
+  'Listening', 'Speaking', 'Culture/Communication'
+];
+var _IELTS_CATS = [
+  'Skills', 'Question types', 'Strategy', 'Accents', 'Vocabulary',
+  'Task 1 \u2014 Chart types', 'Task 1 \u2014 Structure',
+  'Task 1 \u2014 Language',   'Task 1 \u2014 Strategy',
+  'Task 2 \u2014 Essay types','Task 2 \u2014 Structure',
+  'Task 2 \u2014 Language',   'Task 2 \u2014 Topic vocab',
+  'Task 2 \u2014 Strategy',
+  'Assessment criteria', 'Common errors',
+  'Part 1 \u2014 Topics',     'Part 1 \u2014 Strategy',
+  'Part 2 \u2014 Cue card types','Part 2 \u2014 Structure',
+  'Part 3 \u2014 Discussion', 'Pronunciation', 'Fluency'
+];
+
+// ── Load a level ──────────────────────────────────────────────────────────────
+async function sylLoad(level) {
+  _sLevel  = level;
+  _sCat    = 'All';
+  _sQuery  = '';
+
+  var searchEl = document.querySelector('.syl-search');
+  if (searchEl) searchEl.value = '';
+
+  // Tabs
+  document.querySelectorAll('.level-tabs .ltab').forEach(function(b) {
+    b.classList.remove('active', 'dim');
+    b.classList.add(b.dataset.level === level ? 'active' : 'dim');
+  });
+
+  document.getElementById('topic-list').innerHTML =
+    '<div style="padding:20px;font-size:13px;color:var(--ink3)">Loading topics\u2026</div>';
+
+  try {
+    var results = await Promise.all([
+      api.call('getTopicsByLevel', level),
+      api.call('getTopicStats', level),
+      api.call('getTotalMinutesPerTopic')
+    ]);
+
+    _sTopics = Array.isArray(results[0]) ? results[0] : [];
+    _sMpt    = (results[2] && typeof results[2] === 'object') ? results[2] : {};
+
+    _sylStatsUpdate(results[1] || {});
+    _sylCatPills();
+    sylRender();
+  } catch (e) {
+    document.getElementById('topic-list').innerHTML =
+      '<div style="padding:20px;font-size:13px;color:var(--red2)">Error: ' +
+      escHtml(e.message) + '</div>';
+  }
+}
+
+// ── Stats boxes ───────────────────────────────────────────────────────────────
+function _sylStatsUpdate(s) {
+  var total = s.total || 0;
+  var pct   = function(n) { return total > 0 ? Math.round(n / total * 100) : 0; };
+
+  function setText(id, v) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = v;
+  }
+  function setWidth(id, w) {
+    var el = document.getElementById(id);
+    if (el) el.style.width = w + '%';
+  }
+
+  setText('syl-total',     total);
+  setText('syl-mastered',  s.mastered   || 0);
+  setText('syl-learning',  s.learning   || 0);
+  setText('syl-ns',        s.notStarted || 0);
+  setText('syl-total-sub', 'topics in ' + _sLevel);
+  setWidth('syl-bar-m',  pct(s.mastered   || 0));
+  setWidth('syl-bar-l',  pct(s.learning   || 0));
+  setWidth('syl-bar-ns', pct(s.notStarted || 0));
+}
+
+// ── Category filter pills ─────────────────────────────────────────────────────
+function _sylCatPills() {
+  var seen = {};
+  var cats = ['All'];
+  _sTopics.forEach(function(t) {
+    if (t.category && !seen[t.category]) {
+      seen[t.category] = true;
+      cats.push(t.category);
+    }
+  });
+  // Sort all but 'All'
+  var rest = cats.slice(1).sort();
+  cats = ['All'].concat(rest);
+
+  document.getElementById('cat-filters').innerHTML = cats.map(function(c) {
+    var active = c === _sCat ? ' active' : '';
+    var safe   = c.replace(/'/g, "\\'");
+    return '<button class="chip' + active + '" onclick="setCatFilter(\'' +
+           safe + '\')">' + escHtml(c) + '</button>';
+  }).join('');
+}
+
+function setCatFilter(cat) {
+  _sCat = cat;
+  _sylCatPills();
+  sylRender();
+}
+
+function sylSearch(q) {
+  _sQuery = q;
+  sylRender();
+}
+
+// ── Render topic list ─────────────────────────────────────────────────────────
+function sylRender() {
+  var showArchived = document.getElementById('show-archived').checked;
+  var q = _sQuery.toLowerCase();
+
+  var visible = _sTopics.filter(function(t) {
+    if (!showArchived && t.status === 'Archived') return false;
+    if (_sCat !== 'All' && t.category !== _sCat) return false;
+    if (q && t.topic.toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+
+  if (visible.length === 0) {
+    document.getElementById('topic-list').innerHTML =
+      '<div style="padding:20px;font-size:13px;color:var(--ink3)">No topics match the current filter.</div>';
+    return;
+  }
+
+  // Group by category preserving natural order from the data
+  var grouped  = {};
+  var catOrder = [];
+  visible.forEach(function(t) {
+    if (!grouped[t.category]) {
+      grouped[t.category] = [];
+      catOrder.push(t.category);
+    }
+    grouped[t.category].push(t);
+  });
+
+  // Deduplicate catOrder (shouldn't be needed but safe)
+  var seen = {};
+  catOrder = catOrder.filter(function(c) {
+    if (seen[c]) return false;
+    seen[c] = true;
+    return true;
+  });
+  catOrder.sort();
+
+  document.getElementById('topic-list').innerHTML = catOrder.map(function(cat) {
+    return '<div class="topic-group-lbl">' + escHtml(cat) + '</div>' +
+           '<div class="card" style="padding:0;overflow:hidden">' +
+           grouped[cat].map(_sylCard).join('') +
+           '</div>';
+  }).join('');
+}
+
+function _sylCard(t) {
+  var dotCls = ({
+    'Not started': 'dot--gray',
+    'Learning':    'dot--y',
+    'Mastered':    'dot--g',
+    'Archived':    'dot--gray'
+  })[t.status] || 'dot--gray';
+
+  var pillCls = ({
+    'Not started': 'pill--ns',
+    'Learning':    'pill--l',
+    'Mastered':    'pill--m',
+    'Archived':    'pill--ns'
+  })[t.status] || 'pill--ns';
+
+  var mins = _sMpt[t.id] || 0;
+  var tStr = mins === 0 ? '\u2014'
+    : mins < 60 ? mins + 'm'
+    : Math.floor(mins / 60) + 'h' + (mins % 60 > 0 ? '\u00a0' + (mins % 60) + 'm' : '');
+
+  var spark = '';
+  if (mins > 0) {
+    spark = '<div class="sparkline" style="margin-right:8px">' +
+      '<div class="sp-bar" style="height:' + Math.min(100, Math.round(mins / 3))   + '%"></div>' +
+      '<div class="sp-bar" style="height:' + Math.min(100, Math.round(mins / 2))   + '%"></div>' +
+      '<div class="sp-bar" style="height:' + Math.min(100, Math.round(mins / 1.5)) + '%"></div>' +
+      '</div>';
+  }
+
+  var resIcon = (t.resources && t.resources.trim())
+    ? '<span class="topic-resource-dot" title="Has resources"></span>'
+    : '';
+
+  var safeId = t.id.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+  return '<div class="topic-card" onclick="sylOpenTopic(\'' + safeId + '\')">' +
+    '<span class="dot ' + dotCls + '"></span>' +
+    '<div style="flex:1;min-width:0"><div class="topic-name">' + escHtml(t.topic) + '</div></div>' +
+    resIcon +
+    spark +
+    '<span class="topic-time">' + tStr + '</span>' +
+    '<span class="pill ' + pillCls + '">' + t.status + '</span>' +
+    '</div>';
+}
+
+// ── Category select in modal ──────────────────────────────────────────────────
+function _fillCatSelect(level) {
+  var cats = level === 'IELTS' ? _IELTS_CATS : _GERMAN_CATS;
+  document.getElementById('te-cat').innerHTML =
+    '<option value="">\u2014 select \u2014</option>' +
+    cats.map(function(c) {
+      return '<option value="' + escHtml(c) + '">' + escHtml(c) + '</option>';
+    }).join('');
+}
+
+// ── Open topic modal (edit) ───────────────────────────────────────────────────
+function sylOpenTopic(id) {
+  var t = null;
+  for (var i = 0; i < _sTopics.length; i++) {
+    if (_sTopics[i].id === id) { t = _sTopics[i]; break; }
+  }
+  if (!t) return;
+  _sTopicId = id;
+
+  _fillCatSelect(_sLevel);
+
+  document.getElementById('te-title').textContent    = 'Edit topic';
+  document.getElementById('te-id-label').textContent = id;
+  document.getElementById('te-cat').value            = t.category         || '';
+  document.getElementById('te-name').value           = t.topic            || '';
+  document.getElementById('te-notes').value          = t.notes            || '';
+  document.getElementById('te-resources').value      = t.resources        || '';
+  document.getElementById('te-prereqs').value        = t.prerequisites    || '';
+  document.getElementById('te-collab').value         = t.collaboratorNote || '';
+
+  document.querySelectorAll('.te-status-chip').forEach(function(c) {
+    c.classList.toggle('active', c.dataset.status === t.status);
+  });
+
+  document.getElementById('te-archive-btn').style.display = 'inline-flex';
+  openModal('modal-topic-edit');
+}
+
+// ── Open topic modal (new) ────────────────────────────────────────────────────
+function openNewTopicModal() {
+  _sTopicId = null;
+  _fillCatSelect(_sLevel);
+
+  document.getElementById('te-title').textContent    = 'Add topic';
+  document.getElementById('te-id-label').textContent = 'auto';
+
+  ['te-cat', 'te-name', 'te-notes', 'te-resources', 'te-prereqs', 'te-collab'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+
+  document.querySelectorAll('.te-status-chip').forEach(function(c) {
+    c.classList.toggle('active', c.dataset.status === 'Not started');
+  });
+
+  document.getElementById('te-archive-btn').style.display = 'none';
+  openModal('modal-topic-edit');
+}
+
+// ── Save topic ────────────────────────────────────────────────────────────────
+async function sylSaveTopic() {
+  var cat    = document.getElementById('te-cat').value.trim();
+  var name   = document.getElementById('te-name').value.trim();
+  var chip   = document.querySelector('.te-status-chip.active');
+  var status = chip ? chip.dataset.status : 'Not started';
+  var notes  = document.getElementById('te-notes').value.trim();
+  var res    = document.getElementById('te-resources').value.trim();
+  var pre    = document.getElementById('te-prereqs').value.trim();
+  var col    = document.getElementById('te-collab').value.trim();
+
+  if (!cat)  { showToast('Please select a category.'); return; }
+  if (!name) { showToast('Topic name is required.');   return; }
+
+  var btn = document.getElementById('te-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving\u2026';
+
+  try {
+    if (_sTopicId) {
+      await api.call('updateTopic', _sTopicId, {
+        category: cat, topic: name, status: status,
+        notes: notes, resources: res,
+        prerequisites: pre, collaboratorNote: col
+      });
+      showToast('Topic updated \u2713');
+    } else {
+      await api.call('addTopic', {
+        level: _sLevel, category: cat, topic: name, status: status,
+        notes: notes, resources: res,
+        prerequisites: pre, collaboratorNote: col
+      });
+      showToast('Topic added \u2713');
+    }
+    closeModals();
+    await sylLoad(_sLevel);
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save';
+  }
+}
+
+// ── Archive topic ─────────────────────────────────────────────────────────────
+async function sylArchiveTopic() {
+  if (!_sTopicId) return;
+  var label = _sTopicId;
+  for (var i = 0; i < _sTopics.length; i++) {
+    if (_sTopics[i].id === _sTopicId) { label = _sTopics[i].topic; break; }
+  }
+  if (!confirm('Archive "' + label + '"?')) return;
+
+  try {
+    await api.call('archiveTopic', _sTopicId);
+    showToast('Topic archived');
+    closeModals();
+    await sylLoad(_sLevel);
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  }
+}
+
+// ── Status chip toggle ────────────────────────────────────────────────────────
+document.querySelectorAll('.te-status-chip').forEach(function(chip) {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.te-status-chip').forEach(function(c) {
+      c.classList.remove('active');
+    });
+    chip.classList.add('active');
+  });
+});
+
+// ── Auto-load when page tab becomes visible ───────────────────────────────────
+new MutationObserver(function() {
+  if (document.getElementById('page-syllabus').classList.contains('active')) {
+    var ws    = window._activeWorkspace || 'German';
+    var level = 'A1';
+    if (typeof WORKSPACE_DEFAULT_LEVEL !== 'undefined' && WORKSPACE_DEFAULT_LEVEL[ws]) {
+      level = WORKSPACE_DEFAULT_LEVEL[ws];
+    } else if (ws === 'IELTS') {
+      level = 'IELTS';
+    }
+    if (!_sylLoaded || _sLevel !== level) {
+      _sylLoaded = true;
+      sylLoad(level);
+    }
+  }
+}).observe(document.getElementById('page-syllabus'), {
+  attributes: true,
+  attributeFilter: ['class']
+});
+</script>

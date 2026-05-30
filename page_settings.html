@@ -137,7 +137,7 @@
 })();
 
 // Load system log
-(async function loadSystemLog() {
+async function loadSystemLog() {
   try {
     const runs = await api.call('getRecentTriggerRuns');
     const list = document.getElementById('system-log-list');
@@ -153,7 +153,8 @@
         <span class="tr-time">${r.timestamp ? new Date(r.timestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</span>
       </div>`).join('');
   } catch (e) { /* silent */ }
-})();
+}
+loadSystemLog();
 
 async function saveProfile() {
   const pairs = [
@@ -198,12 +199,12 @@ async function savePhase() {
 
 async function rerunRefresh() {
   showToast('Running morning refresh…');
-  try { await api.call('runMorningRefreshNow'); showToast('Refresh complete ✓'); }
-  catch (e) { showToast('Error: ' + e.message); }
-}
-
-function runMorningRefreshNow() {
-  try { morningRefresh && morningRefresh(); } catch(e){}
-  return {success: true};
+  try {
+    await api.call('runMorningRefreshNow');
+    showToast('Refresh complete ✓');
+    await loadSystemLog();
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  }
 }
 </script>
