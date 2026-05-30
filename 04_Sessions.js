@@ -3,7 +3,7 @@ function startSession(params) {
   if (!track) return { error: 'Track is required.' };
 
   const active = getActiveSession();
-  if (active) return { error: 'A session is already active — stop it first.' };
+  if (active) return { error: 'A session is already active - stop it first.' };
 
   const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_SESSIONS);
   if (!sheet) return { error: 'Sessions sheet not found.' };

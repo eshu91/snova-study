@@ -1,38 +1,46 @@
 <script>
-  
 // ── Navigation ────────────────────────────────────────────────────────────────
 function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  const p = document.getElementById('page-' + id);
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(b) { b.classList.remove('active'); });
+  var p = document.getElementById('page-' + id);
   if (p) p.classList.add('active');
   if (btn) btn.classList.add('active');
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 function showToast(msg) {
-  const c = document.getElementById('toasts');
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
+  var c = document.getElementById('toasts');
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
   c.appendChild(t);
-  setTimeout(() => t.remove(), 3400);
+  setTimeout(function() { t.remove(); }, 3400);
 }
 
 // ── Modals ────────────────────────────────────────────────────────────────────
 function openModal(id) {
   closeModals();
-  const m = document.getElementById(id);
+  var m = document.getElementById(id);
   if (m) m.classList.add('open');
 }
 function closeModals() {
-  document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.modal-backdrop').forEach(function(m) { m.classList.remove('open'); });
 }
-document.querySelectorAll('.modal-backdrop').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) closeModals(); });
+document.querySelectorAll('.modal-backdrop').forEach(function(m) {
+  m.addEventListener('click', function(e) { if (e.target === m) closeModals(); });
 });
 
 // ── Search ────────────────────────────────────────────────────────────────────
-openSearch
+var _searchTimer = null;
+
+function openSearch() {
+  document.getElementById('search-modal').classList.add('open');
+  document.getElementById('search-inp').value = '';
+  document.getElementById('search-results').innerHTML = _searchDefault_();
+  setTimeout(function() { document.getElementById('search-inp').focus(); }, 50);
+}
+
 function closeSearch(e) {
   if (e && e.target !== document.getElementById('search-modal')) return;
   clearTimeout(_searchTimer);
@@ -41,115 +49,118 @@ function closeSearch(e) {
   document.getElementById('search-results').innerHTML = _searchDefault_();
 }
 
-let _searchTimer = null;
-
 function doSearch(q) {
   clearTimeout(_searchTimer);
-  const results = document.getElementById('search-results');
+  var results = document.getElementById('search-results');
 
   if (!q || q.trim().length < 2) {
     results.innerHTML = _searchDefault_();
     return;
   }
 
-  results.innerHTML =
-    '<div style="padding:14px 18px;font-size:12px;color:var(--ink3)">Searching…</div>';
+  results.innerHTML = '<div style="padding:14px 18px;font-size:12px;color:var(--ink3)">Searching\u2026</div>';
 
-  _searchTimer = setTimeout(async () => {
+  _searchTimer = setTimeout(async function() {
     try {
-      const items = await api.call('searchTopics', q.trim());
-
+      var items = await api.call('searchTopics', q.trim());
       if (!items || items.length === 0) {
         results.innerHTML =
-          `<div style="padding:24px 18px;text-align:center;font-size:13px;color:var(--ink3)">
-            No topics found for "<strong>${escHtml(q)}</strong>"
-          </div>`;
+          '<div style="padding:24px 18px;text-align:center;font-size:13px;color:var(--ink3)">' +
+          'No topics found for \u201c<strong>' + escHtml(q) + '</strong>\u201d</div>';
         return;
       }
-
-      const levelLabel = lvl => lvl === 'IELTS' ? 'IELTS' : 'German ' + lvl;
-      const pillCls = s => ({'Not started':'pill--ns','Learning':'pill--l','Mastered':'pill--m'}[s] || 'pill--ns');
-      const dotCls  = s => ({'Not started':'dot--gray','Learning':'dot--y','Mastered':'dot--g'}[s] || 'dot--gray');
-
-      results.innerHTML =
-        `<div class="search-section-lbl">Topics (${items.length})</div>` +
-        items.map(t => {
-          const safeLevel = t.level.replace(/'/g, "\\'");
-          return `<div class="search-result"
-              onclick="closeSearch();showPage('syllabus',document.getElementById('nav-syllabus'));sylLoad('${safeLevel}')">
-            <div class="search-result-icon" style="background:var(--surface2);align-items:center;justify-content:center">
-              <span class="dot ${dotCls(t.status)}" style="width:10px;height:10px"></span>
-            </div>
-            <div style="flex:1;min-width:0">
-              <div class="search-result-name">${escHtml(t.topic)}</div>
-              <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
-                <span style="font-size:10px;color:var(--ink3)">${escHtml(levelLabel(t.level))}</span>
-                <span class="pill ${pillCls(t.status)}" style="font-size:10px;padding:1px 6px">${t.status}</span>
-              </div>
-            </div>
-          </div>`;
-        }).join('');
+      var html = '<div class="search-section-lbl">Topics (' + items.length + ')</div>';
+      items.forEach(function(t) {
+        var levelLabel = t.level === 'IELTS' ? 'IELTS' : 'German ' + t.level;
+        var pillCls = ({ 'Not started':'pill--ns','Learning':'pill--l','Mastered':'pill--m' })[t.status] || 'pill--ns';
+        var dotCls  = ({ 'Not started':'dot--gray','Learning':'dot--y','Mastered':'dot--g' })[t.status] || 'dot--gray';
+        var safeLevel = t.level.replace(/'/g, "\\'");
+        html += '<div class="search-result" onclick="closeSearch();showPage(\'syllabus\',document.getElementById(\'nav-syllabus\'));sylLoad(\'' + safeLevel + '\')">' +
+          '<div class="search-result-icon" style="background:var(--surface2)"><span class="dot ' + dotCls + '" style="width:10px;height:10px"></span></div>' +
+          '<div style="flex:1;min-width:0"><div class="search-result-name">' + escHtml(t.topic) + '</div>' +
+          '<div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="font-size:10px;color:var(--ink3)">' + escHtml(levelLabel) + '</span>' +
+          '<span class="pill ' + pillCls + '" style="font-size:10px;padding:1px 6px">' + t.status + '</span></div></div></div>';
+      });
+      results.innerHTML = html;
     } catch (e) {
-      results.innerHTML =
-        `<div style="padding:14px 18px;font-size:12px;color:var(--red2)">
-          Error: ${escHtml(e.message)}
-        </div>`;
+      results.innerHTML = '<div style="padding:14px 18px;font-size:12px;color:var(--red2)">Error: ' + escHtml(e.message) + '</div>';
     }
   }, 300);
 }
 
 function _searchDefault_() {
-  return `
-    <div class="search-section-lbl">Quick actions</div>
-    <div class="search-result" onclick="closeSearch();showPage('today',document.getElementById('nav-today'))">
-      <div class="search-result-icon" style="background:var(--accent-bg)">📖</div>
-      <div><div class="search-result-name">Start a study session</div>
-           <div class="search-result-sub">Today → timer</div></div>
-    </div>
-    <div class="search-result" onclick="closeSearch();openModal('modal-backfill')">
-      <div class="search-result-icon" style="background:var(--surface2)">⏪</div>
-      <div><div class="search-result-name">Log a past session</div>
-           <div class="search-result-sub">Backfill a session you forgot to track</div></div>
-    </div>
-    <div class="search-result"
-      onclick="closeSearch();showPage('syllabus',document.getElementById('nav-syllabus'));openNewTopicModal()">
-      <div class="search-result-icon" style="background:var(--surface2)">➕</div>
-      <div><div class="search-result-name">Add a new topic</div>
-           <div class="search-result-sub">Open topic creator</div></div>
-    </div>
-    <div class="search-result" onclick="closeSearch();showPage('stats',document.getElementById('nav-stats'))">
-      <div class="search-result-icon" style="background:var(--gold-bg)">📊</div>
-      <div><div class="search-result-name">View stats</div>
-           <div class="search-result-sub">Study summary and progress</div></div>
-    </div>
-    <div style="padding:10px 18px 6px;font-size:11px;color:var(--ink3)">
-      Type 2+ characters to search topics across all levels
-    </div>`;
+  return '<div class="search-section-lbl">Quick actions</div>' +
+    '<div class="search-result" onclick="closeSearch();showPage(\'today\',document.getElementById(\'nav-today\'))">' +
+      '<div class="search-result-icon" style="background:var(--accent-bg)">📖</div>' +
+      '<div><div class="search-result-name">Start a study session</div><div class="search-result-sub">Today \u2192 timer</div></div></div>' +
+    '<div class="search-result" onclick="closeSearch();openModal(\'modal-backfill\')">' +
+      '<div class="search-result-icon" style="background:var(--surface2)">⏪</div>' +
+      '<div><div class="search-result-name">Log a past session</div><div class="search-result-sub">Backfill a session you forgot to track</div></div></div>' +
+    '<div class="search-result" onclick="closeSearch();showPage(\'syllabus\',document.getElementById(\'nav-syllabus\'));openNewTopicModal()">' +
+      '<div class="search-result-icon" style="background:var(--surface2)">➕</div>' +
+      '<div><div class="search-result-name">Add a new topic</div><div class="search-result-sub">Open topic creator</div></div></div>' +
+    '<div class="search-result" onclick="closeSearch();showPage(\'stats\',document.getElementById(\'nav-stats\'))">' +
+      '<div class="search-result-icon" style="background:var(--gold-bg)">📊</div>' +
+      '<div><div class="search-result-name">View stats</div><div class="search-result-sub">Study summary and progress</div></div></div>' +
+    '<div style="padding:10px 18px 6px;font-size:11px;color:var(--ink3)">Type 2+ characters to search topics across all levels</div>';
 }
 
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', function(e) {
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
   if (e.key === 'Escape') { closeModals(); closeSearch(); }
 });
 
 // ── Workspace switcher ────────────────────────────────────────────────────────
+var WORKSPACE_TRACKS = {
+  German: ['German A1', 'German A2', 'German B1', 'German B2'],
+  IELTS:  ['IELTS Reading', 'IELTS Writing', 'IELTS Listening', 'IELTS Speaking', 'IELTS Mock']
+};
+
+var WORKSPACE_DEFAULT_LEVEL = { German: 'A1', IELTS: 'IELTS' };
+
+window._activeWorkspace = 'German';
+
 function toggleWsDropdown() {
   document.getElementById('ws-dropdown').classList.toggle('open');
   document.getElementById('ws-arrow').classList.toggle('open');
 }
+
 function switchWorkspace(el, name, icon, bg) {
-  document.querySelectorAll('.ws-option').forEach(o => o.classList.remove('active'));
+  window._activeWorkspace = name;
+
+  document.querySelectorAll('.ws-option').forEach(function(o) { o.classList.remove('active'); });
   el.classList.add('active');
   document.getElementById('ws-current-name').textContent = name;
-  const ic = document.querySelector('.ws-current .ws-icon');
+  var ic = document.querySelector('.ws-current .ws-icon');
   if (ic) { ic.textContent = icon; ic.style.background = bg; }
   document.getElementById('ws-dropdown').classList.remove('open');
   document.getElementById('ws-arrow').classList.remove('open');
-  showToast('Switched to ' + name);
+
+  _updateTrackDropdown(name);
+
+  var level = WORKSPACE_DEFAULT_LEVEL[name];
+  if (level && document.getElementById('page-syllabus').classList.contains('active')) {
+    if (typeof sylLoad === 'function') sylLoad(level);
+  }
+
+  if (!WORKSPACE_TRACKS[name]) showToast(name + ' \u2014 coming soon');
+}
+
+function _updateTrackDropdown(workspace) {
+  var sel    = document.getElementById('track-sel');
+  var tracks = WORKSPACE_TRACKS[workspace];
+  if (!sel || !tracks) return;
+
+  var chips = document.getElementById('topic-chips');
+  if (chips) chips.innerHTML = '<span style="font-size:12px;color:var(--ink3)">Select a track first</span>';
+
+  sel.innerHTML = '<option value="">\u2014 select a track \u2014</option>' +
+    tracks.map(function(t) { return '<option>' + t + '</option>'; }).join('');
+  sel.value = '';
 }
 
 // ── Timer ─────────────────────────────────────────────────────────────────────
-const TOPIC_CHIPS = {
+var TOPIC_CHIPS = {
   'German A1':       ['Gender of nouns','Modal verbs','Negation: nicht/kein','Present tense','Personal pronouns'],
   'German A2':       ['Perfekt tense','Dative case','Reflexive verbs','Subordinate clauses'],
   'German B1':       ['Passive voice','Relative clauses','Infinitive constructions','Plusquamperfekt'],
@@ -158,71 +169,69 @@ const TOPIC_CHIPS = {
   'IELTS Writing':   ['Task 1 overview','Trend vocab','Essay structure','Cohesive devices'],
   'IELTS Listening': ['Identifying numbers','Handling distractors','Form completion'],
   'IELTS Speaking':  ['Part 1 fluency','Cue card structure','Part 3 discussion'],
-  'IELTS Mock':      ['Full mock test'],
+  'IELTS Mock':      ['Full mock test']
 };
 
-let timerInterval = null;
-let timerSecs     = 0;
-let selTopics     = [];
-let selType       = 'Study';
+var timerInterval = null;
+var timerSecs     = 0;
+var selTopics     = [];
+var selType       = 'Study';
 
-document.querySelectorAll('.stype-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.stype-btn').forEach(x => x.classList.remove('active'));
+document.querySelectorAll('.stype-btn').forEach(function(b) {
+  b.addEventListener('click', function() {
+    document.querySelectorAll('.stype-btn').forEach(function(x) { x.classList.remove('active'); });
     b.classList.add('active');
     selType = b.dataset.type;
   });
 });
 
 async function loadTopics() {
-  const track = document.getElementById('track-sel').value;
-  const c     = document.getElementById('topic-chips');
-  selTopics   = [];
+  var track = document.getElementById('track-sel').value;
+  var c     = document.getElementById('topic-chips');
+  selTopics = [];
   if (!track) {
     c.innerHTML = '<span style="font-size:12px;color:var(--ink3)">Select a track first</span>';
     return;
   }
-  c.innerHTML = '<span style="font-size:12px;color:var(--ink3)">Loading…</span>';
+  c.innerHTML = '<span style="font-size:12px;color:var(--ink3)">Loading\u2026</span>';
   try {
-    const topics = await api.call('getTopicsForTrack', track);
+    var topics = await api.call('getTopicsForTrack', track);
     if (!topics || topics.length === 0) {
-      c.innerHTML = '<span style="font-size:12px;color:var(--ink3)">No active topics for this track — add some in Syllabus</span>';
+      c.innerHTML = '<span style="font-size:12px;color:var(--ink3)">No active topics for this track \u2014 add some in Syllabus</span>';
       return;
     }
-    c.innerHTML = topics.map(t => {
-      const label   = t.topic.length > 32 ? t.topic.slice(0, 30) + '…' : t.topic;
-      const safeId  = t.id.replace(/'/g,"\\'");
-      const safeLbl = escHtml(label);
-      return `<button class="chip" onclick="toggleTopic(this,'${safeId}')" title="${escHtml(t.topic)}">${safeLbl}</button>`;
+    c.innerHTML = topics.map(function(t) {
+      var label  = t.topic.length > 32 ? t.topic.slice(0, 30) + '\u2026' : t.topic;
+      var safeId = t.id.replace(/'/g, "\\'");
+      return '<button class="chip" onclick="toggleTopic(this,\'' + safeId + '\')" title="' + escHtml(t.topic) + '">' + escHtml(label) + '</button>';
     }).join('');
   } catch (e) {
-    // Fallback to static chips when offline or before sheets are seeded
-    const fallback = TOPIC_CHIPS[track] || [];
-    c.innerHTML = fallback.map(t =>
-      `<button class="chip" onclick="toggleTopic(this,'${t.replace(/'/g,"\\'")}')">${escHtml(t)}</button>`
-    ).join('');
+    var fallback = TOPIC_CHIPS[track] || [];
+    c.innerHTML = fallback.map(function(t) {
+      return '<button class="chip" onclick="toggleTopic(this,\'' + t.replace(/'/g, "\\'") + '\')">' + escHtml(t) + '</button>';
+    }).join('');
   }
 }
 
 function toggleTopic(btn, t) {
-  const i = selTopics.indexOf(t);
+  var i = selTopics.indexOf(t);
   if (i >= 0) { selTopics.splice(i, 1); btn.classList.remove('active'); }
   else         { selTopics.push(t);      btn.classList.add('active'); }
 }
 
 async function startTimer() {
-  const track = document.getElementById('track-sel').value;
+  var track = document.getElementById('track-sel').value;
   if (!track) { showToast('Please select a track first.'); return; }
 
-  const btn = document.querySelector('#t-idle .btn--primary');
-  if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
+  var btn = document.querySelector('#t-idle .btn--primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Starting\u2026'; }
 
   try {
-    const res = await api.call('startSession', {
-      track,
+    var res = await api.call('startSession', {
+      track:       track,
       topicIds:    selTopics,
       sessionType: selType,
-      notes:       document.getElementById('sess-notes').value,
+      notes:       document.getElementById('sess-notes').value
     });
 
     if (res && res.error) { showToast('Error: ' + res.error); return; }
@@ -232,14 +241,15 @@ async function startTimer() {
     document.getElementById('timer-card').classList.add('running');
     document.getElementById('t-track-lbl').textContent = track;
     document.getElementById('t-type-lbl').textContent  = selType;
-    const ac = document.getElementById('t-active-chips');
-    ac.innerHTML = selTopics.map(t => `<span class="chip active">${t}</span>`).join('');
+
+    var ac = document.getElementById('t-active-chips');
+    ac.innerHTML = selTopics.map(function(t) { return '<span class="chip active">' + escHtml(t) + '</span>'; }).join('');
 
     timerSecs     = 0;
-    timerInterval = setInterval(() => {
+    timerInterval = setInterval(function() {
       timerSecs++;
-      const m = String(Math.floor(timerSecs / 60)).padStart(2, '0');
-      const s = String(timerSecs % 60).padStart(2, '0');
+      var m = String(Math.floor(timerSecs / 60)).padStart(2, '0');
+      var s = String(timerSecs % 60).padStart(2, '0');
       document.getElementById('t-display').innerHTML = m + '<span class="sep">:</span>' + s;
     }, 1000);
   } catch (e) {
@@ -251,7 +261,7 @@ async function startTimer() {
 
 async function stopTimer() {
   clearInterval(timerInterval);
-  const reported = timerSecs < 60 ? 1 : Math.round(timerSecs / 60);
+  var reported = timerSecs < 60 ? 1 : Math.round(timerSecs / 60);
 
   try {
     await api.call('stopSession', { minutesSelfReported: reported });
@@ -260,8 +270,8 @@ async function stopTimer() {
   }
 
   resetTimerUI();
-  showToast('Session saved — ' + reported + ' min logged');
-  setTimeout(() => openModal('modal-quality'), 400);
+  showToast('Session saved \u2014 ' + reported + ' min logged');
+  setTimeout(function() { openModal('modal-quality'); }, 400);
 }
 
 async function cancelTimer() {
@@ -271,7 +281,8 @@ async function cancelTimer() {
 }
 
 function resetTimerUI() {
-  timerSecs = 0; selTopics = [];
+  timerSecs = 0;
+  selTopics = [];
   document.getElementById('t-idle').style.display   = 'block';
   document.getElementById('t-active').style.display = 'none';
   document.getElementById('timer-card').classList.remove('running');
@@ -282,96 +293,61 @@ function resetTimerUI() {
 }
 
 // ── Quality stars ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.qstar').forEach(star => {
-  star.addEventListener('click', function () {
-    const val      = parseInt(this.dataset.q);
-    const siblings = this.closest('.quality-row').querySelectorAll('.qstar');
-    siblings.forEach((s, i) => s.classList.toggle('active', i < val));
-    const lbl    = this.closest('.modal')?.querySelector('#quality-label');
-    const labels = ['','Poor focus','Okay','Good','Very good','Excellent'];
+document.querySelectorAll('.qstar').forEach(function(star) {
+  star.addEventListener('click', function() {
+    var val      = parseInt(star.dataset.q);
+    var siblings = star.closest('.quality-row').querySelectorAll('.qstar');
+    siblings.forEach(function(s, i) { s.classList.toggle('active', i < val); });
+    var lbl    = star.closest('.modal') ? star.closest('.modal').querySelector('#quality-label') : null;
+    var labels = ['','Poor focus','Okay','Good','Very good','Excellent'];
     if (lbl) lbl.textContent = labels[val] || '';
   });
 });
 
-// ── Syllabus filters ──────────────────────────────────────────────────────────
-function setLevel(btn) {
-  document.querySelectorAll('.level-tabs .ltab').forEach(b => b.classList.remove('active','dim'));
-  btn.classList.add('active');
-  showToast('Loading ' + btn.textContent.trim() + ' topics…');
-}
-function setCat(btn) {
-  document.querySelectorAll('[onclick*=setCat]').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-}
-function filterTopics(q) {
-  document.querySelectorAll('.topic-card').forEach(c => {
-    const name = c.querySelector('.topic-name')?.textContent.toLowerCase() || '';
-    c.style.display = (!q || name.includes(q.toLowerCase())) ? '' : 'none';
-  });
-}
-
 // ── Phase options ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.phase-opt').forEach(o => {
-  o.addEventListener('click', () => {
-    document.querySelectorAll('.phase-opt').forEach(x => x.classList.remove('active'));
+document.querySelectorAll('.phase-opt').forEach(function(o) {
+  o.addEventListener('click', function() {
+    document.querySelectorAll('.phase-opt').forEach(function(x) { x.classList.remove('active'); });
     o.classList.add('active');
   });
 });
 
-// ── Heatmap ───────────────────────────────────────────────────────────────────
-(function buildHeatmap() {
-  const wrap = document.getElementById('heatmap');
-  if (!wrap) return;
-  const lvl = [0,0,1,0,2,3,4,2,1,0,0,3,2,4,3,1,0,2,3,2,1,0,0,1,4,3,2,1,0,3];
-  const pat = [0,1,2,1,3,2,4,1,2,3,1,0,2,4,3,2,1,0,3,2,1,4,3,2,1,0,3,4,2,1];
-  for (let i = 0; i < 182; i++) {
-    const cell = document.createElement('div');
-    const mix  = Math.min(4, Math.round((lvl[i % lvl.length] + pat[i % pat.length]) / 2));
-    cell.className = 'hm-cell hm-' + mix;
-    cell.title     = mix * 30 + ' min';
-    wrap.appendChild(cell);
-  }
-})();
-
 // ── Greeting ──────────────────────────────────────────────────────────────────
-(function setGreeting() {
-  const hr = new Date().getHours();
-  const sub = document.getElementById('greet-sub');
-  const dt  = document.getElementById('greet-date');
+(function() {
+  var hr  = new Date().getHours();
+  var sub = document.getElementById('greet-sub');
+  var dt  = document.getElementById('greet-date');
   if (sub) sub.textContent = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
-  if (dt)  dt.textContent  = new Date().toLocaleDateString('en-GB',
-    {weekday:'long', day:'numeric', month:'long'});
+  if (dt)  dt.textContent  = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
 })();
 
 // ── Online / offline ──────────────────────────────────────────────────────────
-window.addEventListener('offline', () => { document.getElementById('offline-bar').style.display = 'block'; });
-window.addEventListener('online',  () => { document.getElementById('offline-bar').style.display = 'none'; });
+window.addEventListener('offline', function() { document.getElementById('offline-bar').style.display = 'block'; });
+window.addEventListener('online',  function() { document.getElementById('offline-bar').style.display = 'none'; });
 
 // ── Mood buttons ──────────────────────────────────────────────────────────────
-document.querySelectorAll('.mood-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    const row = b.closest('.mood-row');
-    row.querySelectorAll('.mood-btn').forEach(x => {
-      x.style.background = 'none';
-    });
+document.querySelectorAll('.mood-btn').forEach(function(b) {
+  b.addEventListener('click', function() {
+    var row = b.closest('.mood-row');
+    row.querySelectorAll('.mood-btn').forEach(function(x) { x.style.background = 'none'; });
     b.style.background = 'var(--gold-light)';
   });
 });
 
-// ── Page init: load real data after render ────────────────────────────────────
-(async function initPage() {
-  // Streak
+// ── Page init: load real data ─────────────────────────────────────────────────
+(async function() {
+  // Streak badge
   try {
-    const streak = await api.call('getStreak');
-    const badge  = document.getElementById('streak-badge');
-    if (badge) badge.textContent = '🔥 ' + (streak || 0);
-  } catch (e) { /* streak badge stays at — */ }
+    var streak = await api.call('getStreak');
+    var badge  = document.getElementById('streak-badge');
+    if (badge) badge.textContent = '\uD83D\uDD25 ' + (streak || 0);
+  } catch (e) { /* stays at - */ }
 
-  // Active session check (timer recovery)
+  // Timer recovery - if a session was left running
   try {
-    const active = await api.call('getActiveSession');
+    var active = await api.call('getActiveSession');
     if (active && active.startTime) {
-      const elapsed = Math.round((Date.now() - new Date(active.startTime)) / 1000);
+      var elapsed = Math.round((Date.now() - new Date(active.startTime).getTime()) / 1000);
       if (elapsed > 0) {
         document.getElementById('t-idle').style.display   = 'none';
         document.getElementById('t-active').style.display = 'block';
@@ -379,14 +355,17 @@ document.querySelectorAll('.mood-btn').forEach(b => {
         document.getElementById('t-track-lbl').textContent = active.track || '';
         document.getElementById('t-type-lbl').textContent  = active.sessionType || 'Study';
         timerSecs     = elapsed;
-        timerInterval = setInterval(() => {
+        timerInterval = setInterval(function() {
           timerSecs++;
-          const m = String(Math.floor(timerSecs / 60)).padStart(2, '0');
-          const s = String(timerSecs % 60).padStart(2, '0');
+          var m = String(Math.floor(timerSecs / 60)).padStart(2, '0');
+          var s = String(timerSecs % 60).padStart(2, '0');
           document.getElementById('t-display').innerHTML = m + '<span class="sep">:</span>' + s;
         }, 1000);
       }
     }
   } catch (e) { /* no active session */ }
 })();
+
+// ── Initialise track dropdown to default workspace ────────────────────────────
+_updateTrackDropdown('German');
 </script>

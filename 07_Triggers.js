@@ -35,7 +35,7 @@ function dailyCheck() {
     }
 
     sendDailyNudge_(config, total);
-    writeSystemLog('dailyCheck', 'sent', 'Nudge sent — ' + total + ' min today');
+    writeSystemLog('dailyCheck', 'sent', 'Nudge sent - ' + total + ' min today');
   } catch (e) {
     writeSystemLog('dailyCheck', 'error', e.message);
   }
@@ -89,7 +89,7 @@ function phaseTransitionCheck() {
 
     const collab = config.collaborator_email;
     if (!collab) {
-      writeSystemLog('phaseTransitionCheck', 'warn', 'IELTS date passed — no collaborator_email to alert');
+      writeSystemLog('phaseTransitionCheck', 'warn', 'IELTS date passed - no collaborator_email to alert');
       return;
     }
 

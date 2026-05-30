@@ -26,7 +26,7 @@
           <div class="field">
             <label class="fl">Track</label>
             <select id="track-sel" onchange="loadTopics()">
-              <option value="">— select a track —</option>
+              <option value="">- select a track -</option>
               <option>German A1</option><option>German A2</option>
               <option>German B1</option><option>German B2</option>
               <option>IELTS Reading</option><option>IELTS Writing</option>
@@ -47,7 +47,7 @@
 
         <div id="t-active" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <span class="timer-track-label"><span class="dot dot--g"></span><span id="t-track-lbl">—</span></span>
+            <span class="timer-track-label"><span class="dot dot--g"></span><span id="t-track-lbl">-</span></span>
             <span style="font-size:11px;color:var(--ink3)" id="t-type-lbl">📖 Study</span>
             <button class="cancel-link" onclick="cancelTimer()">cancel</button>
           </div>
@@ -81,7 +81,7 @@
       <div class="card card--green" style="margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div style="font-size:12px;font-weight:500;color:var(--accent)">Weekly intention</div>
-          <button class="btn btn--ghost btn--sm" style="height:26px;font-size:11px;padding:0 10px" onclick="showToast('Edit weekly goals — coming soon')">edit</button>
+          <button class="btn btn--ghost btn--sm" style="height:26px;font-size:11px;padding:0 10px" onclick="showToast('Edit weekly goals - coming soon')">edit</button>
         </div>
         <div style="font-size:12px;color:var(--accent);margin-bottom:6px">German sessions: <strong>4 / 5</strong></div>
         <div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:80%"></div></div>
@@ -91,7 +91,7 @@
 
       <div class="sec-label" style="margin-top:0">today's study</div>
       <div class="g2" id="today-stats" style="margin-bottom:14px">
-        <div class="sb"><div class="sb-lbl">Loading…</div><div class="sb-val" style="font-size:26px">—</div><div class="sb-unit">min today</div></div>
+        <div class="sb"><div class="sb-lbl">Loading…</div><div class="sb-val" style="font-size:26px">-</div><div class="sb-unit">min today</div></div>
       </div>
 
       <div class="sec-label">recent sessions</div>
@@ -136,7 +136,7 @@
 <div class="modal-backdrop" id="modal-quality">
   <div class="modal" style="padding-bottom:28px">
     <div class="modal-handle"></div>
-    <div class="modal-title">Session saved — how did it go?</div>
+    <div class="modal-title">Session saved - how did it go?</div>
     <div style="text-align:center;margin-bottom:18px">
       <div style="font-size:13px;color:var(--ink3);margin-bottom:14px">Rate your confidence / focus for this session</div>
       <div class="quality-row">
@@ -189,7 +189,7 @@ async function saveQualityRating() {
     const container = document.getElementById('today-stats');
     const entries = Object.entries(todayMin);
     if (entries.length === 0) {
-      container.innerHTML = '<div class="sb"><div class="sb-lbl">No sessions yet</div><div class="sb-val" style="font-size:20px">—</div><div class="sb-unit">today</div></div>';
+      container.innerHTML = '<div class="sb"><div class="sb-lbl">No sessions yet</div><div class="sb-val" style="font-size:20px">-</div><div class="sb-unit">today</div></div>';
     } else {
       container.innerHTML = entries.map(([track, mins]) =>
         `<div class="sb"><div class="sb-lbl">${track}</div><div class="sb-val" style="font-size:26px">${mins}</div><div class="sb-unit">min today</div></div>`
@@ -201,7 +201,7 @@ async function saveQualityRating() {
     const sessions = await api.call('getRecentSessions', 5);
     const list = document.getElementById('recent-sessions-list');
     if (!sessions || sessions.length === 0) {
-      list.innerHTML = '<div style="padding:16px;font-size:12px;color:var(--ink3)">No sessions yet — start one above!</div>';
+      list.innerHTML = '<div style="padding:16px;font-size:12px;color:var(--ink3)">No sessions yet - start one above!</div>';
       return;
     }
     const dotColor = t => t.startsWith('German') ? 'g' : 'b';

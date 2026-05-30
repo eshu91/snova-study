@@ -1,4 +1,9 @@
 <script>
+// Defined here (in <head>) so all page scripts can use it immediately.
+const escHtml = s =>
+  String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+           .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
 const api = {
   call(name, ...args) {
     return new Promise((resolve, reject) => {

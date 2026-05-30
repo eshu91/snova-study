@@ -10,22 +10,22 @@
   <div class="g4" style="margin-bottom:22px">
     <div class="card">
       <div class="sb-lbl">total study</div>
-      <div class="sb-val" id="st-total">—</div>
+      <div class="sb-val" id="st-total">-</div>
       <div class="sb-unit">this week</div>
     </div>
     <div class="card">
       <div class="sb-lbl">days studied</div>
-      <div class="sb-val" id="st-days">—</div>
+      <div class="sb-val" id="st-days">-</div>
       <div class="sb-unit">this week</div>
     </div>
     <div class="card">
       <div class="sb-lbl">topics mastered</div>
-      <div class="sb-val" id="st-mastered">—</div>
+      <div class="sb-val" id="st-mastered">-</div>
       <div class="sb-unit">this week</div>
     </div>
     <div class="card">
       <div class="sb-lbl">streak</div>
-      <div class="sb-val" id="st-streak">— 🔥</div>
+      <div class="sb-val" id="st-streak">- 🔥</div>
       <div class="sb-unit">days</div>
     </div>
   </div>
@@ -35,27 +35,27 @@
   <div class="g5" style="margin-bottom:22px">
     <div class="sb" style="text-align:center">
       <div style="font-size:18px;margin-bottom:4px">📖</div>
-      <div style="font-size:18px;font-weight:500" id="st-type-study">—</div>
+      <div style="font-size:18px;font-weight:500" id="st-type-study">-</div>
       <div class="sb-unit">Study</div>
     </div>
     <div class="sb" style="text-align:center">
       <div style="font-size:18px;margin-bottom:4px">✏️</div>
-      <div style="font-size:18px;font-weight:500" id="st-type-practice">—</div>
+      <div style="font-size:18px;font-weight:500" id="st-type-practice">-</div>
       <div class="sb-unit">Practice</div>
     </div>
     <div class="sb" style="text-align:center">
       <div style="font-size:18px;margin-bottom:4px">🔄</div>
-      <div style="font-size:18px;font-weight:500" id="st-type-review">—</div>
+      <div style="font-size:18px;font-weight:500" id="st-type-review">-</div>
       <div class="sb-unit">Review</div>
     </div>
     <div class="sb" style="text-align:center">
       <div style="font-size:18px;margin-bottom:4px">🎧</div>
-      <div style="font-size:18px;font-weight:500" id="st-type-watch">—</div>
+      <div style="font-size:18px;font-weight:500" id="st-type-watch">-</div>
       <div class="sb-unit">Watch/Listen</div>
     </div>
     <div class="sb" style="text-align:center">
       <div style="font-size:18px;margin-bottom:4px">📝</div>
-      <div style="font-size:18px;font-weight:500" id="st-type-test">—</div>
+      <div style="font-size:18px;font-weight:500" id="st-type-test">-</div>
       <div class="sb-unit">Test</div>
     </div>
   </div>
@@ -117,7 +117,7 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Weekly intentions</div>
     <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">
-      Soft weekly targets — no pressure, just visibility.
+      Soft weekly targets - no pressure, just visibility.
     </div>
     <div id="intentions-form"></div>
     <div class="modal-footer">
@@ -161,7 +161,7 @@ async function statsLoad() {
 // ── Render helpers ────────────────────────────────────────────────────────────
 function _stRenderSummary(s) {
   const $ = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  $('stats-week-label', 'week of ' + (s.weekLabel || '—'));
+  $('stats-week-label', 'week of ' + (s.weekLabel || '-'));
   $('st-total',   _fmtMins(s.totalMinutes || 0));
   $('st-days',    (s.daysStudied || 0) + '/7');
   $('st-mastered', s.topicsMastered || 0);
@@ -247,7 +247,7 @@ function _stRenderGoals(intentions, progress) {
 
   document.getElementById('stats-goals').innerHTML = `
     <div style="font-size:12px;font-weight:500;color:var(--accent);margin-bottom:12px">
-      Soft goals for this week — no pressure, just visibility
+      Soft goals for this week - no pressure, just visibility
     </div>
     <div class="g2">${rows}</div>
     <button class="btn btn--ghost btn--sm"
@@ -260,7 +260,7 @@ function _stRenderCandidates(candidates) {
   const badge = document.getElementById('review-badge');
 
   if (!candidates || candidates.length === 0) {
-    el.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--ink3)">No review candidates — you\'re on top of everything!</div>';
+    el.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--ink3)">No review candidates - you\'re on top of everything!</div>';
     if (badge) badge.style.display = 'none';
     return;
   }

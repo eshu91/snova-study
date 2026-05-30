@@ -149,13 +149,13 @@ function getTopicsForTrack(track) {
 
   const IELTS_FILTER = {
     'IELTS Reading':   ['Skills','Question types','Strategy','Vocabulary'],
-    'IELTS Writing':   ['Task 1 — Chart types','Task 1 — Structure','Task 1 — Language',
-                        'Task 1 — Strategy','Task 2 — Essay types','Task 2 — Structure',
-                        'Task 2 — Language','Task 2 — Topic vocab','Task 2 — Strategy',
+    'IELTS Writing':   ['Task 1 - Chart types','Task 1 - Structure','Task 1 - Language',
+                        'Task 1 - Strategy','Task 2 - Essay types','Task 2 - Structure',
+                        'Task 2 - Language','Task 2 - Topic vocab','Task 2 - Strategy',
                         'Assessment criteria','Common errors'],
     'IELTS Listening': ['Skills','Question types','Strategy','Accents'],
-    'IELTS Speaking':  ['Part 1 — Topics','Part 1 — Strategy','Part 2 — Cue card types',
-                        'Part 2 — Structure','Part 3 — Discussion','Assessment criteria',
+    'IELTS Speaking':  ['Part 1 - Topics','Part 1 - Strategy','Part 2 - Cue card types',
+                        'Part 2 - Structure','Part 3 - Discussion','Assessment criteria',
                         'Pronunciation','Fluency','Strategy'],
   };
 

@@ -22,12 +22,12 @@
         <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid var(--border)">
           <div style="font-size:18px">🇩🇪</div>
           <div style="flex:1"><div class="srow-lbl">German</div><div class="srow-sub">A1 → B2 · 4 levels</div></div>
-          <button class="btn btn--ghost btn--sm" onclick="showToast('Edit German workspace — coming soon')">edit</button>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('Edit German workspace - coming soon')">edit</button>
         </div>
         <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid var(--border)">
           <div style="font-size:18px">📝</div>
           <div style="flex:1"><div class="srow-lbl">IELTS</div><div class="srow-sub">1 level · 140 topics</div></div>
-          <button class="btn btn--ghost btn--sm" onclick="showToast('Edit IELTS workspace — coming soon')">edit</button>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('Edit IELTS workspace - coming soon')">edit</button>
         </div>
       </div>
 
@@ -66,7 +66,7 @@
       </div>
       <div class="card card--blue" style="margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:14px">
-          <div style="font-family:'DM Serif Display',serif;font-size:44px;color:var(--blue);line-height:1" id="settings-countdown">—</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:44px;color:var(--blue);line-height:1" id="settings-countdown">-</div>
           <div><div style="font-size:13px;font-weight:500;color:var(--blue)">days until IELTS</div><div style="font-size:11px;color:var(--blue);opacity:.7;margin-top:2px" id="settings-ielts-date">17 September 2026</div></div>
         </div>
       </div>
@@ -77,17 +77,17 @@
         <div class="export-option">
           <div class="export-icon">📥</div>
           <div style="flex:1"><div class="srow-lbl">Anki deck</div><div class="srow-sub">Topic → front, notes → back</div></div>
-          <button class="btn btn--ghost btn--sm" onclick="showToast('Anki export — coming soon')">Export</button>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('Anki export - coming soon')">Export</button>
         </div>
         <div class="export-option">
           <div class="export-icon">📄</div>
           <div style="flex:1"><div class="srow-lbl">Markdown checklist</div><div class="srow-sub">All topics as a .md file</div></div>
-          <button class="btn btn--ghost btn--sm" onclick="showToast('Markdown export — coming soon')">Export</button>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('Markdown export - coming soon')">Export</button>
         </div>
         <div class="export-option">
           <div class="export-icon">📊</div>
           <div style="flex:1"><div class="srow-lbl">Sessions CSV</div><div class="srow-sub">All sessions with times</div></div>
-          <button class="btn btn--ghost btn--sm" onclick="showToast('CSV export — coming soon')">Export</button>
+          <button class="btn btn--ghost btn--sm" onclick="showToast('CSV export - coming soon')">Export</button>
         </div>
       </div>
 
@@ -137,7 +137,7 @@
 })();
 
 // Load system log
-(async function loadSystemLog() {
+async function loadSystemLog() {
   try {
     const runs = await api.call('getRecentTriggerRuns');
     const list = document.getElementById('system-log-list');
@@ -153,7 +153,8 @@
         <span class="tr-time">${r.timestamp ? new Date(r.timestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</span>
       </div>`).join('');
   } catch (e) { /* silent */ }
-})();
+}
+loadSystemLog();
 
 async function saveProfile() {
   const pairs = [
@@ -198,12 +199,12 @@ async function savePhase() {
 
 async function rerunRefresh() {
   showToast('Running morning refresh…');
-  try { await api.call('runMorningRefreshNow'); showToast('Refresh complete ✓'); }
-  catch (e) { showToast('Error: ' + e.message); }
-}
-
-function runMorningRefreshNow() {
-  try { morningRefresh && morningRefresh(); } catch(e){}
-  return {success: true};
+  try {
+    await api.call('runMorningRefreshNow');
+    showToast('Refresh complete ✓');
+    await loadSystemLog();
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  }
 }
 </script>

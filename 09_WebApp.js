@@ -10,7 +10,7 @@ function doGet() {
     tmpl.statuses     = TOPIC_STATUSES;
 
     return tmpl.evaluate()
-      .setTitle('lernen / track — ' + (cfg.user_name || 'Study Tracker'))
+      .setTitle('Study Tracker - ' + (cfg.user_name || 'Study Tracker'))
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
       .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
   } catch (err) {

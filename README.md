@@ -14,3 +14,30 @@
 9. **Bookmark the URL** on Snova's phone home screen
 
 The next step after this is `03_SyllabusRepository.gs` — the CRUD layer that makes the Syllabus page actually read/write from the sheets. The topic list in `page_syllabus.html` currently shows static placeholder cards; wiring it to real data is Milestone 1.
+
+
+e:/codes/projects/snova-study/
+├── .clasp.json
+├── .claspignore
+├── 00_Setup.js
+├── 01_Constants.js
+├── 02_Config.js
+├── 03_SyllabusRepository.js
+├── 04_Sessions.js
+├── 05_DailyLog.js
+├── 06_AuditLog.js
+├── 07_Triggers.js
+├── 08_Email.js
+├── 09_WebApp.js
+├── 10_Stats.js
+├── appsscript.json
+├── index.html
+├── page_settings.html
+├── page_stats.html
+├── page_syllabus.html
+├── page_today.html
+├── partial_nav.html
+├── README.md
+├── script_api.html
+├── script_app.html
+└── style_base.html
