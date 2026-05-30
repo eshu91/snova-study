@@ -1,6 +1,6 @@
 /**
  * All email templates and send functions.
- * Called only from 07_Triggers.gs — never directly from the web app.
+ * Called only from 07_Triggers.gs - never directly from the web app.
  */
 
 // ── Send functions ────────────────────────────────────────────────────────────
@@ -13,7 +13,7 @@ function sendDailyNudge_(config, todayMinutes) {
 
   const msgLine = todayMinutes === 0
     ? `No sessions logged yet today.`
-    : `You've logged <strong>${todayMinutes}&nbsp;min</strong> today — just short of the ${minReq}&nbsp;min that counts toward your streak.`;
+    : `You've logged <strong>${todayMinutes}&nbsp;min</strong> today - just short of the ${minReq}&nbsp;min that counts toward your streak.`;
 
   const countdownHtml = (days && days > 0 && config.phase === PHASE_PRE_IELTS)
     ? `<div style="display:inline-block;background:#e6f0fb;border-radius:8px;padding:10px 16px;margin-top:18px">
@@ -28,7 +28,7 @@ function sendDailyNudge_(config, todayMinutes) {
     </p>
     <p style="font-size:15px;line-height:1.75;color:#3a3a3a;margin:0 0 12px">${msgLine}</p>
     <p style="font-size:14px;line-height:1.75;color:#6b6560;margin:0">
-      Even 15 quiet minutes counts. Rest days are healthy too — 
+      Even 15 quiet minutes counts. Rest days are healthy too - 
       if today was one intentionally, ignore this.
     </p>
     ${countdownHtml}
@@ -36,7 +36,7 @@ function sendDailyNudge_(config, todayMinutes) {
 
   MailApp.sendEmail({
     to:       notif,
-    subject:  `Hey ${name} — quick check-in 👋`,
+    subject:  `Hey ${name} - quick check-in 👋`,
     htmlBody: _wrap_(body, _footerLine_(config)),
   });
 }
@@ -118,7 +118,7 @@ function sendWeeklySummary_(config) {
 
   MailApp.sendEmail({
     to:       notif,
-    subject:  `${name}'s week — ${summary.weekLabel}`,
+    subject:  `${name}'s week - ${summary.weekLabel}`,
     htmlBody: _wrap_(body, _footerLine_(config)),
   });
 }
@@ -130,7 +130,7 @@ function sendStaleTimerAlert_(config, count, hours) {
   const body = `
     <p style="font-size:21px;font-weight:700;margin:0 0 14px">Timer auto-closed 🕰</p>
     <p style="font-size:15px;line-height:1.75;color:#3a3a3a;margin:0 0 12px">
-      Hey&nbsp;${_esc_(name)} — ${count === 1 ? 'a timer' : count + ' timers'} that had been 
+      Hey&nbsp;${_esc_(name)} - ${count === 1 ? 'a timer' : count + ' timers'} that had been 
       running for over <strong>${hours}&nbsp;hours</strong> 
       ${count === 1 ? 'was' : 'were'} automatically cancelled.
     </p>
@@ -142,7 +142,7 @@ function sendStaleTimerAlert_(config, count, hours) {
 
   MailApp.sendEmail({
     to:       notif,
-    subject:  `Your study timer was auto-closed — lernen / track`,
+    subject:  `Your study timer was auto-closed - lernen / track`,
     htmlBody: _wrap_(body, _footerLine_(config)),
   });
 }
@@ -154,7 +154,7 @@ function sendPhaseTransitionAlert_(config) {
   const body = `
     <p style="font-size:21px;font-weight:700;margin:0 0 14px">Phase update needed 📋</p>
     <p style="font-size:15px;line-height:1.75;color:#3a3a3a;margin:0 0 12px">
-      Hey Nova — the IELTS test date 
+      Hey Nova - the IELTS test date 
       (<strong>${_esc_(config.ielts_test_date)}</strong>) has passed 
       while the tracker is still set to <strong>pre_ielts</strong>.
     </p>
@@ -170,7 +170,7 @@ function sendPhaseTransitionAlert_(config) {
 
   MailApp.sendEmail({
     to:       collab,
-    subject:  `${userName}'s IELTS date has passed — phase update needed`,
+    subject:  `${userName}'s IELTS date has passed - phase update needed`,
     htmlBody: _wrap_(body, `lernen / track &nbsp;·&nbsp; ${_dateLabel_()}<br>Sent to Nova (${_esc_(collab)})`),
   });
 }
