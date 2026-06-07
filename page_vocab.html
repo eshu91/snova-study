@@ -1,0 +1,511 @@
+<div class="page" id="page-vocab">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Vocabulary</h1>
+      <div class="page-sub">Collect words, get AI meanings, build your word bank</div>
+    </div>
+  </div>
+
+  <!-- Tab toggle -->
+  <div class="vocab-tabs">
+    <button class="vtab active" onclick="vocabSwitchTab(this,'add')">Add words</button>
+    <button class="vtab" onclick="vocabSwitchTab(this,'browse')">Browse all</button>
+  </div>
+
+  <!-- ── TAB: Add words ── -->
+  <div id="vocab-tab-add">
+    <div class="gcols-6040">
+      <div>
+        <!-- Entry card -->
+        <div class="card vocab-entry-card">
+          <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:14px">Add a new word</div>
+          <div class="vocab-input-row">
+            <div class="field">
+              <label class="fl">Word or phrase</label>
+              <input type="text" class="vocab-word-input" id="vocab-word" placeholder="e.g. ubiquitous">
+            </div>
+            <div class="field">
+              <label class="fl">Track</label>
+              <select id="vocab-track"></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="btn btn--teal btn--full" id="btn-vocab-next" onclick="vocabSaveWord()">Next →</button>
+          </div>
+        </div>
+
+        <!-- API key warning (shown if no key configured) -->
+        <div class="vocab-api-warn" id="vocab-api-warn" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--gold-bg);border:0.5px solid var(--gold-border);border-radius:var(--radius);margin-top:14px;font-size:12px;color:var(--gold)">
+            ⚠ No AI key configured — words save but won't be enriched.
+            <a href="#" style="color:var(--gold);font-weight:500" onclick="event.preventDefault();showPage('settings',document.getElementById('nav-settings'))">Set up in Settings →</a>
+          </div>
+        </div>
+
+        <!-- Enrichment result (populated dynamically) -->
+        <div id="vocab-enrich-card" style="display:none"></div>
+
+        <!-- Suggest words section -->
+        <div class="suggest-section" style="margin-top:14px">
+          <div class="suggest-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+              <div>
+                <div class="suggest-label">✨ AI-suggested words</div>
+                <div style="font-size:11px;color:var(--purple);opacity:.7">Words you might encounter — tap to add</div>
+              </div>
+              <button class="btn btn--sm" style="background:var(--purple);color:#fff;height:32px" id="btn-suggest" onclick="vocabSuggestWords()">Suggest 5</button>
+            </div>
+            <div id="vocab-suggest-chips">
+              <span style="font-size:12px;color:var(--purple);opacity:.6">Tap "Suggest 5" to get started</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: Recent words (workspace-filtered) -->
+      <div>
+        <div class="sec-label" style="margin-top:0" id="vocab-recent-label">recent words</div>
+        <div class="card" style="padding:0;overflow:hidden" id="vocab-recent-list">
+          <div style="padding:16px;font-size:12px;color:var(--ink3)">Loading words…</div>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius);border:0.5px dashed var(--border2);font-size:12px;color:var(--ink3)" id="vocab-workspace-hint">
+          Showing words for current workspace · <a href="#" style="color:var(--teal)" onclick="event.preventDefault();vocabSwitchTab(document.querySelectorAll('.vtab')[1],'browse')">browse all tracks →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compact stats footer -->
+    <div class="vocab-footer" id="vocab-footer">
+      <span style="font-size:12px;color:var(--ink3)">Loading stats…</span>
+    </div>
+  </div>
+
+  <!-- ── TAB: Browse all ── -->
+  <div id="vocab-tab-browse" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <input type="text" placeholder="Search words…" id="vocab-browse-search" style="flex:1;min-width:160px" oninput="vocabBrowseFilter()">
+      <div class="chip-row" id="vocab-track-chips"></div>
+      <div class="chip-row" id="vocab-status-chips">
+        <button class="chip active" onclick="vocabStatusFilter(this,'all')">All</button>
+        <button class="chip" onclick="vocabStatusFilter(this,'new')">New</button>
+        <button class="chip" onclick="vocabStatusFilter(this,'reviewed')">Reviewed</button>
+        <button class="chip" onclick="vocabStatusFilter(this,'known')">Known</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden" id="vocab-browse-list">
+      <div style="padding:16px;font-size:12px;color:var(--ink3)">Loading…</div>
+    </div>
+    <div class="vocab-footer" id="vocab-browse-footer"></div>
+  </div>
+</div>
+
+<!-- Modal: Word detail -->
+<div class="modal-backdrop" id="modal-vocab-detail">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
+      <div class="modal-title" style="margin-bottom:0" id="vd-word"></div>
+      <span id="vd-status-pill"></span>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+      <span id="vd-track-pill"></span>
+      <span style="font-size:11px;color:var(--ink3)" id="vd-meta"></span>
+    </div>
+
+    <div class="enrich-section"><div class="enrich-label" style="color:var(--ink3)">Meaning</div><div id="vd-meaning" style="font-size:14px;line-height:1.6;color:var(--ink)"></div></div>
+    <div class="enrich-section"><div class="enrich-label" style="color:var(--ink3)">Synonyms</div><div id="vd-synonyms" class="enrich-chips"></div></div>
+    <div class="enrich-section"><div class="enrich-label" style="color:var(--ink3)">Antonyms</div><div id="vd-antonyms" class="enrich-chips"></div></div>
+    <div class="enrich-section"><div class="enrich-label" style="color:var(--ink3)">Example sentence</div><div id="vd-example" class="enrich-example" style="border-left-color:var(--border2)"></div></div>
+
+    <div class="enrich-section">
+      <div class="enrich-label" style="color:var(--ink3)">Your note</div>
+      <textarea id="vd-notes" placeholder="Add your own note about this word…" style="margin-top:0"></textarea>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <div class="enrich-label" style="color:var(--ink3)">Status</div>
+      <div class="chip-row" style="margin-top:6px" id="vd-status-chips">
+        <button class="chip" onclick="vocabDetailStatus(this,'new')">New</button>
+        <button class="chip" onclick="vocabDetailStatus(this,'reviewed')">Reviewed</button>
+        <button class="chip" onclick="vocabDetailStatus(this,'known')">Known</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn--ghost" onclick="closeModals()">Close</button>
+      <button class="btn btn--ghost" style="color:var(--teal)" id="vd-re-enrich" onclick="vocabReEnrich()">↻ Re-enrich</button>
+      <button class="btn btn--teal" style="flex:1" id="vd-save" onclick="vocabDetailSave()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Vocab state ──────────────────────────────────────────────────────────────
+var _vocabData       = [];   // all words from getRecentVocab
+var _vocabDetailId   = null; // currently open word in modal
+var _vocabBrowseTrack  = 'all';
+var _vocabBrowseStatus = 'all';
+
+// ── Init (called on page load) ───────────────────────────────────────────────
+(async function vocabInit() {
+  vocabUpdateTrackDropdown();
+
+  // Check if API key is configured
+  var key = (window.APP_CONFIG || {}).llm_api_key;
+  if (!key) document.getElementById('vocab-api-warn').style.display = 'block';
+
+  await vocabLoadRecent();
+  await vocabLoadStats();
+})();
+
+// ── Track dropdown: workspace-aware ──────────────────────────────────────────
+function vocabUpdateTrackDropdown() {
+  var ws     = window._activeWorkspace || 'German';
+  var tracks = WORKSPACE_TRACKS[ws];
+  var sel    = document.getElementById('vocab-track');
+  if (!sel || !tracks) return;
+  sel.innerHTML = tracks.map(function(t) { return '<option>' + escHtml(t) + '</option>'; }).join('');
+
+  // Update section label
+  var lbl = document.getElementById('vocab-recent-label');
+  if (lbl) lbl.textContent = 'recent ' + ws + ' words';
+}
+
+// ── Tab switching ────────────────────────────────────────────────────────────
+function vocabSwitchTab(btn, tab) {
+  document.querySelectorAll('.vtab').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('vocab-tab-add').style.display    = tab === 'add' ? 'block' : 'none';
+  document.getElementById('vocab-tab-browse').style.display  = tab === 'browse' ? 'block' : 'none';
+  if (tab === 'browse') vocabLoadBrowse();
+}
+
+// ── Save word ────────────────────────────────────────────────────────────────
+async function vocabSaveWord() {
+  var word  = document.getElementById('vocab-word').value.trim();
+  var track = document.getElementById('vocab-track').value;
+  if (!word) { showToast('Type a word first'); return; }
+
+  var btn = document.getElementById('btn-vocab-next');
+  btn.disabled = true; btn.textContent = 'Enriching…';
+  document.getElementById('vocab-enrich-card').style.display = 'none';
+
+  try {
+    var result = await api.call('addVocabWord', { word: word, track: track });
+    document.getElementById('vocab-word').value = '';
+    document.getElementById('vocab-word').focus();
+    vocabShowEnrichment(result);
+    showToast('Word saved ✓');
+    vocabLoadRecent();
+    vocabLoadStats();
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Next →';
+  }
+}
+
+// ── Show enrichment card ─────────────────────────────────────────────────────
+function vocabShowEnrichment(w) {
+  if (!w) return;
+  var card = document.getElementById('vocab-enrich-card');
+  var isGerman = w.track.indexOf('German') === 0;
+  var trackShort = isGerman ? w.track.replace('German ','') : w.track.replace('IELTS ','');
+  var trackCls   = isGerman ? 'wt-german' : 'wt-ielts';
+
+  var syns = w.synonyms ? w.synonyms.split(',').map(function(s) {
+    return '<span class="enrich-chip">' + escHtml(s.trim()) + '</span>';
+  }).join('') : '<span style="font-size:12px;color:var(--ink3)">—</span>';
+
+  var ants = w.antonyms ? w.antonyms.split(',').map(function(s) {
+    return '<span class="enrich-chip enrich-chip--ant">' + escHtml(s.trim()) + '</span>';
+  }).join('') : '<span style="font-size:12px;color:var(--ink3)">—</span>';
+
+  card.innerHTML =
+    '<div class="enrichment-card">' +
+      '<div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px">' +
+        '<div><span class="enrich-word">' + escHtml(w.word) + '</span>' +
+        '<span class="enrich-track">' + escHtml(w.track) + '</span></div>' +
+        '<span class="pill pill--new">new</span>' +
+      '</div>' +
+      (w.meaning ? '<div class="enrich-meaning">' + escHtml(w.meaning) + '</div>' : '') +
+      '<div class="enrich-section"><div class="enrich-label">Synonyms</div><div class="enrich-chips">' + syns + '</div></div>' +
+      '<div class="enrich-section"><div class="enrich-label">Antonyms</div><div class="enrich-chips">' + ants + '</div></div>' +
+      (w.exampleSentence ? '<div class="enrich-section"><div class="enrich-label">Example sentence</div><div class="enrich-example">' + escHtml(w.exampleSentence) + '</div></div>' : '') +
+      '<div class="enrich-actions">' +
+        '<input type="text" id="vocab-enrich-note" placeholder="Add your own note… (optional)" style="flex:1;height:32px;font-size:12px">' +
+        '<button class="btn btn--ghost btn--sm" onclick="vocabSaveNote(\'' + w.vocabId + '\')">Save note</button>' +
+      '</div>' +
+      (w.enrichmentStatus === 'failed' ? '<div style="margin-top:8px;font-size:11px;color:var(--red2)">⚠ Enrichment failed — word saved without AI data</div>' : '') +
+    '</div>';
+
+  card.style.display = 'block';
+}
+
+async function vocabSaveNote(vocabId) {
+  var note = document.getElementById('vocab-enrich-note').value.trim();
+  if (!note) return;
+  try {
+    await api.call('updateVocabWord', vocabId, { notes: note });
+    showToast('Note saved ✓');
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+
+// ── Load recent words (workspace-filtered) ───────────────────────────────────
+async function vocabLoadRecent() {
+  var ws     = window._activeWorkspace || 'German';
+  var tracks = WORKSPACE_TRACKS[ws] || [];
+  var list   = document.getElementById('vocab-recent-list');
+
+  try {
+    var words = await api.call('getRecentVocab', 15, tracks);
+    _vocabData = words;
+
+    if (!words || words.length === 0) {
+      list.innerHTML = '<div style="padding:24px 16px;text-align:center">' +
+        '<div style="font-size:28px;margin-bottom:8px;opacity:.5">📝</div>' +
+        '<div style="font-size:13px;color:var(--ink2);margin-bottom:4px">No ' + ws + ' words yet</div>' +
+        '<div style="font-size:12px;color:var(--ink3)">Type a word above and tap Next →</div></div>';
+      return;
+    }
+
+    list.innerHTML = words.map(function(w) {
+      var isGerman = w.track.indexOf('German') === 0;
+      var dotCls   = isGerman ? 'dot--g' : 'dot--b';
+      var pillCls  = isGerman ? 'wt-german' : 'wt-ielts';
+      var short    = isGerman ? w.track.replace('German ','') : w.track.replace('IELTS ','');
+      var meaning  = w.meaning ? w.meaning.slice(0, 60) + (w.meaning.length > 60 ? '…' : '') : '';
+      return '<div class="word-row" onclick="vocabOpenDetail(\'' + w.vocabId + '\')">' +
+        '<span class="dot ' + dotCls + '"></span>' +
+        '<div class="word-text">' + escHtml(w.word) + '</div>' +
+        '<div class="word-meaning-preview">' + escHtml(meaning) + '</div>' +
+        '<span class="word-track-pill ' + pillCls + '">' + escHtml(short) + '</span>' +
+        '<span class="word-date">' + _vocabTimeAgo(w.addedOn) + '</span></div>';
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<div style="padding:16px;font-size:12px;color:var(--red2)">Error loading words</div>';
+  }
+}
+
+// ── Load stats (compact footer) ──────────────────────────────────────────────
+async function vocabLoadStats() {
+  var footer = document.getElementById('vocab-footer');
+  try {
+    var s = await api.call('getVocabStats');
+    var parts = [];
+    if (s.german > 0) parts.push('<div class="vf-stat"><div class="vf-dot" style="background:var(--accent2)"></div> <strong>' + s.german + '</strong> German</div>');
+    if (s.ielts > 0)  parts.push('<div class="vf-stat"><div class="vf-dot" style="background:var(--blue2)"></div> <strong>' + s.ielts + '</strong> IELTS</div>');
+    parts.push('<div class="vf-stat"><strong>' + s.total + '</strong> total</div>');
+    if (s.today > 0)  parts.push('<div class="vf-stat"><strong>' + s.today + '</strong> today</div>');
+    footer.innerHTML = parts.join('<div class="vf-sep"></div>');
+  } catch (e) {
+    footer.innerHTML = '<span style="font-size:12px;color:var(--ink3)">—</span>';
+  }
+}
+
+// ── Suggest words ────────────────────────────────────────────────────────────
+async function vocabSuggestWords() {
+  var track = document.getElementById('vocab-track').value;
+  var chips = document.getElementById('vocab-suggest-chips');
+  var btn   = document.getElementById('btn-suggest');
+  btn.disabled = true;
+  chips.innerHTML = '<div class="shimmer" style="width:90px;height:30px;display:inline-block"></div> ' +
+    '<div class="shimmer" style="width:75px;height:30px;display:inline-block"></div> ' +
+    '<div class="shimmer" style="width:100px;height:30px;display:inline-block"></div>';
+
+  try {
+    var words = await api.call('suggestWords', track, 5);
+    if (!words || words.length === 0) {
+      chips.innerHTML = '<span style="font-size:12px;color:var(--purple);opacity:.6">No suggestions returned — check AI config</span>';
+      return;
+    }
+    chips.innerHTML = words.map(function(w) {
+      var safe = escHtml(w);
+      return '<button class="suggest-chip" onclick="vocabAddSuggested(this,\'' + safe.replace(/'/g,"\\'") + '\')">' + safe + ' <span class="plus">+</span></button>';
+    }).join('');
+  } catch (e) {
+    chips.innerHTML = '<span style="font-size:12px;color:var(--red2)">Error: ' + escHtml(e.message) + '</span>';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function vocabAddSuggested(el, word) {
+  el.classList.add('added');
+  el.disabled = true;
+  var track = document.getElementById('vocab-track').value;
+  try {
+    await api.call('addVocabWord', { word: word, track: track, source: 'suggested' });
+    showToast(word + ' added ✓');
+    vocabLoadRecent();
+    vocabLoadStats();
+  } catch (e) {
+    el.classList.remove('added');
+    el.disabled = false;
+    showToast('Error: ' + e.message);
+  }
+}
+
+// ── Browse tab ───────────────────────────────────────────────────────────────
+async function vocabLoadBrowse() {
+  var list = document.getElementById('vocab-browse-list');
+  list.innerHTML = '<div style="padding:16px;font-size:12px;color:var(--ink3)">Loading…</div>';
+
+  // Build track filter chips
+  var chipsCont = document.getElementById('vocab-track-chips');
+  chipsCont.innerHTML = '<button class="chip active" onclick="vocabTrackFilter(this,\'all\')">All</button>' +
+    '<button class="chip" onclick="vocabTrackFilter(this,\'german\')">🇩🇪 German</button>' +
+    '<button class="chip" onclick="vocabTrackFilter(this,\'ielts\')">📝 IELTS</button>';
+
+  try {
+    var words = await api.call('getRecentVocab', 100);
+    _vocabData = words;
+    vocabRenderBrowse(words);
+  } catch (e) {
+    list.innerHTML = '<div style="padding:16px;font-size:12px;color:var(--red2)">Error: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+function vocabRenderBrowse(words) {
+  var list = document.getElementById('vocab-browse-list');
+  if (!words || words.length === 0) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;font-size:13px;color:var(--ink3)">No words found</div>';
+    return;
+  }
+  list.innerHTML = words.map(function(w) {
+    var isGerman = w.track.indexOf('German') === 0;
+    var dotCls   = isGerman ? 'dot--g' : 'dot--b';
+    var pillCls  = isGerman ? 'wt-german' : 'wt-ielts';
+    var statusCls = ({ 'new':'pill--new', reviewed:'pill--reviewed', known:'pill--known' })[w.status] || 'pill--ns';
+    var meaning  = w.meaning ? w.meaning.slice(0, 50) + (w.meaning.length > 50 ? '…' : '') : '';
+    return '<div class="word-row" onclick="vocabOpenDetail(\'' + w.vocabId + '\')">' +
+      '<span class="dot ' + dotCls + '"></span>' +
+      '<div class="word-text">' + escHtml(w.word) + '</div>' +
+      '<div class="word-meaning-preview">' + escHtml(meaning) + '</div>' +
+      '<span class="word-track-pill ' + pillCls + '">' + escHtml(w.track) + '</span>' +
+      '<span class="pill ' + statusCls + '" style="font-size:10px;padding:1px 7px">' + w.status + '</span>' +
+      '<span class="word-date">' + _vocabTimeAgo(w.addedOn) + '</span></div>';
+  }).join('');
+}
+
+function vocabBrowseFilter() {
+  var q = document.getElementById('vocab-browse-search').value.toLowerCase();
+  var filtered = _vocabData.filter(function(w) {
+    if (_vocabBrowseTrack === 'german' && w.track.indexOf('German') !== 0) return false;
+    if (_vocabBrowseTrack === 'ielts'  && w.track.indexOf('IELTS')  !== 0) return false;
+    if (_vocabBrowseStatus !== 'all' && w.status !== _vocabBrowseStatus) return false;
+    if (q && w.word.toLowerCase().indexOf(q) < 0 && w.meaning.toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  vocabRenderBrowse(filtered);
+}
+
+function vocabTrackFilter(btn, val) {
+  btn.closest('.chip-row').querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
+  btn.classList.add('active');
+  _vocabBrowseTrack = val;
+  vocabBrowseFilter();
+}
+function vocabStatusFilter(btn, val) {
+  btn.closest('.chip-row').querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
+  btn.classList.add('active');
+  _vocabBrowseStatus = val;
+  vocabBrowseFilter();
+}
+
+// ── Word detail modal ────────────────────────────────────────────────────────
+function vocabOpenDetail(vocabId) {
+  var w = _vocabData.find(function(v) { return v.vocabId === vocabId; });
+  if (!w) return;
+  _vocabDetailId = vocabId;
+
+  var isGerman = w.track.indexOf('German') === 0;
+  var pillCls  = isGerman ? 'wt-german' : 'wt-ielts';
+  var statusCls = ({ 'new':'pill--new', reviewed:'pill--reviewed', known:'pill--known' })[w.status] || 'pill--ns';
+
+  document.getElementById('vd-word').textContent = w.word;
+  document.getElementById('vd-status-pill').className = 'pill ' + statusCls;
+  document.getElementById('vd-status-pill').textContent = w.status;
+  document.getElementById('vd-track-pill').className = 'word-track-pill ' + pillCls;
+  document.getElementById('vd-track-pill').textContent = w.track;
+  document.getElementById('vd-meta').textContent = 'Added ' + _vocabTimeAgo(w.addedOn) + ' · ' + w.source;
+  document.getElementById('vd-meaning').textContent = w.meaning || '—';
+  document.getElementById('vd-notes').value = w.notes || '';
+
+  // Synonyms
+  var synEl = document.getElementById('vd-synonyms');
+  synEl.innerHTML = w.synonyms ? w.synonyms.split(',').map(function(s) {
+    return '<span class="enrich-chip">' + escHtml(s.trim()) + '</span>';
+  }).join('') : '<span style="font-size:12px;color:var(--ink3)">—</span>';
+
+  // Antonyms
+  var antEl = document.getElementById('vd-antonyms');
+  antEl.innerHTML = w.antonyms ? w.antonyms.split(',').map(function(s) {
+    return '<span class="enrich-chip enrich-chip--ant">' + escHtml(s.trim()) + '</span>';
+  }).join('') : '<span style="font-size:12px;color:var(--ink3)">—</span>';
+
+  // Example
+  document.getElementById('vd-example').textContent = w.exampleSentence || '—';
+
+  // Status chips
+  document.querySelectorAll('#vd-status-chips .chip').forEach(function(c) {
+    c.classList.toggle('active', c.textContent.toLowerCase() === w.status);
+  });
+
+  // Show re-enrich if failed
+  document.getElementById('vd-re-enrich').style.display = (w.enrichmentStatus === 'failed' || w.enrichmentStatus === 'pending') ? '' : 'none';
+
+  openModal('modal-vocab-detail');
+}
+
+function vocabDetailStatus(btn, status) {
+  document.querySelectorAll('#vd-status-chips .chip').forEach(function(c) { c.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+async function vocabDetailSave() {
+  if (!_vocabDetailId) return;
+  var status = 'new';
+  var activeChip = document.querySelector('#vd-status-chips .chip.active');
+  if (activeChip) status = activeChip.textContent.toLowerCase();
+  var notes = document.getElementById('vd-notes').value;
+
+  try {
+    await api.call('updateVocabWord', _vocabDetailId, { status: status, notes: notes });
+    closeModals();
+    showToast('Word updated ✓');
+    vocabLoadRecent();
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+
+async function vocabReEnrich() {
+  if (!_vocabDetailId) return;
+  var btn = document.getElementById('vd-re-enrich');
+  btn.textContent = 'Enriching…'; btn.disabled = true;
+  try {
+    var w = await api.call('retryEnrichment', _vocabDetailId);
+    closeModals();
+    showToast('Re-enriched ✓');
+    vocabLoadRecent();
+    if (w) vocabShowEnrichment(w);
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  } finally {
+    btn.textContent = '↻ Re-enrich'; btn.disabled = false;
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function _vocabTimeAgo(iso) {
+  if (!iso) return '';
+  var d   = new Date(iso);
+  var now = new Date();
+  var sec = Math.round((now - d) / 1000);
+  if (sec < 60)    return 'just now';
+  if (sec < 3600)  return Math.floor(sec / 60) + 'm ago';
+  if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+  var days = Math.floor(sec / 86400);
+  if (days === 1) return 'Yesterday';
+  if (days < 7)  return days + ' days ago';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+</script>

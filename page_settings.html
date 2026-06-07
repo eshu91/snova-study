@@ -44,6 +44,36 @@
       <button class="btn btn--primary btn--sm" style="margin-top:10px" onclick="saveBehaviour()">Save behaviour</button>
     </div>
 
+    <div class="sec-label">ai enrichment (vocab)</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="settings-row"><div><div class="srow-lbl">Provider</div><div class="srow-sub">LLM provider for vocab enrichment</div></div>
+      <select class="srow-sel" id="cfg-llm-provider" style="width:160px">
+        <option value="groq">Groq (recommended)</option>
+        <option value="openrouter">OpenRouter</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="openai">OpenAI</option>
+        <option value="custom">Custom endpoint</option>
+      </select>
+        </div>
+        <div class="settings-row"><div><div class="srow-lbl">API key</div><div class="srow-sub">server-side only, never sent to browser</div></div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input class="srow-in" type="password" id="cfg-llm-key" placeholder="sk-or-v1-…" style="width:200px">
+            <button class="btn btn--ghost btn--sm" style="height:32px;padding:0 10px" onclick="document.getElementById('cfg-llm-key').type=document.getElementById('cfg-llm-key').type==='password'?'text':'password'">👁</button>
+          </div>
+        </div>
+        <div class="settings-row"><div><div class="srow-lbl">Model</div></div>
+          <input class="srow-in" type="text" id="cfg-llm-model" placeholder="meta-llama/llama-3.1-8b-instruct:free" style="width:280px">
+        </div>
+        <div class="settings-row"><div><div class="srow-lbl">Base URL</div><div class="srow-sub">OpenAI-compatible endpoint</div></div>
+          <input class="srow-in" type="text" id="cfg-llm-url" style="width:280px">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+        <button class="btn btn--primary btn--sm" onclick="saveLLMConfig()">Save AI config</button>
+        <button class="btn btn--ghost btn--sm" onclick="testLLM()">Test connection</button>
+        <span id="llm-test-result" style="font-size:12px"></span>
+      </div>
+
     <div>
       <div class="sec-label" style="margin-top:0">learning phase</div>
       <div style="margin-bottom:10px">
@@ -119,6 +149,10 @@
   set('cfg-theme',       c.theme);
   set('cfg-ielts-date',  c.ielts_test_date);
   set('cfg-germany-date',c.expected_arrival_germany);
+  set('cfg-llm-provider', c.llm_provider);
+  set('cfg-llm-key',      c.llm_api_key);
+  set('cfg-llm-model',    c.llm_model);
+  set('cfg-llm-url',      c.llm_base_url);
 
   const activePhase = document.querySelector(`.phase-opt[data-phase="${c.phase}"]`);
   if (activePhase) {
@@ -205,6 +239,37 @@ async function rerunRefresh() {
     await loadSystemLog();
   } catch (e) {
     showToast('Error: ' + e.message);
+  }
+}
+
+// ── AI enrichment config ─────────────────────────────────────────────────────
+async function saveLLMConfig() {
+  const pairs = [
+    ['llm_provider', document.getElementById('cfg-llm-provider').value],
+    ['llm_api_key',  document.getElementById('cfg-llm-key').value],
+    ['llm_model',    document.getElementById('cfg-llm-model').value],
+    ['llm_base_url', document.getElementById('cfg-llm-url').value],
+  ];
+  try {
+    for (const [k,v] of pairs) await api.call('setConfigValue', k, v);
+    showToast('AI config saved ✓');
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+
+async function testLLM() {
+  var r = document.getElementById('llm-test-result');
+  r.textContent = 'Testing…'; r.style.color = 'var(--ink3)';
+  try {
+    var res = await api.call('testLLMConnection');
+    if (res.ok) {
+      r.textContent = '✓ ' + res.model + ' responded in ' + res.latency + 'ms';
+      r.style.color = 'var(--accent)';
+    } else {
+      r.textContent = '✗ ' + (res.error || 'Failed');
+      r.style.color = 'var(--red)';
+    }
+  } catch (e) {
+    r.textContent = '✗ ' + e.message; r.style.color = 'var(--red)';
   }
 }
 </script>

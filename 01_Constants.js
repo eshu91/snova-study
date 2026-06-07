@@ -5,6 +5,8 @@ const SHEET_DAILY_LOG = 'DailyLog';
 const SHEET_AUDIT_LOG = 'AuditLog';
 const SHEET_SYS_LOG   = '_systemLog';
 const SHEET_DASHBOARD = 'Dashboard';
+const SHEET_VOCABULARY = 'Vocabulary';
+const SHEET_LLM_LOG   = '_llmLog';
 
 const SYLLABUS_SHEETS = {
   A1:    'German_A1',
@@ -66,6 +68,21 @@ const COL_LOG = {
 const COL_AUDIT  = { TIMESTAMP: 0, USER_EMAIL: 1, ACTION: 2, SHEET: 3, ROW_ID: 4, FIELD: 5, BEFORE: 6, AFTER: 7 };
 const COL_SYSLOG = { TIMESTAMP: 0, TRIGGER: 1, STATUS: 2, DETAIL: 3 };
 
+const COL_VOCAB = {
+  VOCAB_ID: 0, WORD: 1, TRACK: 2, MEANING: 3,
+  SYNONYMS: 4, ANTONYMS: 5, EXAMPLE_SENTENCE: 6,
+  SOURCE: 7, STATUS: 8, NOTES: 9,
+  ENRICHMENT_STATUS: 10, ADDED_ON: 11, ADDED_BY: 12,
+};
+
+const COL_LLM = {
+  TIMESTAMP: 0, VOCAB_ID: 1, MODEL: 2, PROVIDER: 3,
+  PROMPT_TOKENS: 4, COMPLETION_TOKENS: 5,
+  STATUS: 6, LATENCY_MS: 7, ERROR_DETAIL: 8,
+};
+
+const VOCAB_STATUSES = ['new', 'reviewed', 'known'];
+
 // ── Sheet headers ─────────────────────────────────────────────────────────────
 const HDR_CONFIG    = ['key', 'value', 'description'];
 const HDR_SYLLABUS  = ['id','category','topic','status','started_on','mastered_on',
@@ -77,6 +94,13 @@ const HDR_SESSIONS  = ['session_id','start_time','end_time','duration_min','trac
 const HDR_DAILY_LOG = ['date','tracks_studied','total_minutes','anki_done','mood','notes','created_by'];
 const HDR_AUDIT_LOG = ['timestamp','user_email','action','sheet','row_id','field','before','after'];
 const HDR_SYS_LOG   = ['timestamp','trigger','status','detail'];
+
+const HDR_VOCABULARY = ['vocab_id','word','track','meaning','synonyms','antonyms',
+                        'example_sentence','source','status','notes',
+                        'enrichment_status','added_on','added_by'];
+const HDR_LLM_LOG   = ['timestamp','vocab_id','model','provider',
+                        'prompt_tokens','completion_tokens','status',
+                        'latency_ms','error_detail'];
 
 // ── Config defaults ───────────────────────────────────────────────────────────
 const CONFIG_DEFAULTS = {
@@ -96,4 +120,10 @@ const CONFIG_DEFAULTS = {
   stale_session_hours:      '4',
   theme:                    'auto',
   web_app_version:          '2.0.0',
+  
+  llm_provider:             'groq',
+  llm_api_key:              '',
+  llm_model:                'llama-3.3-70b-versatile',
+  llm_base_url:             'https://api.groq.com/openai/v1/chat/completions',
+
 };
