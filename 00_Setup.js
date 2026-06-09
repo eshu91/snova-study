@@ -28,6 +28,9 @@ function runSetup() {
   const llmLog = ss.getSheetByName(SHEET_LLM_LOG);
   if (llmLog) llmLog.hideSheet();
 
+  const ctrLog = ss.getSheetByName(SHEET_COUNTERS);
+  if (ctrLog) ctrLog.hideSheet();
+
   console.log('runSetup() complete. Next: run populateIELTSSyllabus().');
 }
 

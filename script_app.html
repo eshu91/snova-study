@@ -8,6 +8,7 @@ function showPage(id, btn) {
   if (btn) btn.classList.add('active');
 
   if(id === 'practice' && typeof pracLoad === 'function') pracLoad();
+  if(id === 'stats' && typeof statsLoad === 'function') statsLoad();
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────

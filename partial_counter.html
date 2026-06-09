@@ -1,0 +1,406 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     partial_counter.html — Quick counter/stopwatch/timer widget
+     Lightweight timing on Stats page. Survives page reload via server state.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+
+<style>
+/* ── Counter widget ── */
+.ctr-widget{margin-bottom:22px}
+.ctr-mode-tabs{display:flex;gap:0;margin-bottom:14px;background:var(--surface2);border-radius:var(--radius);padding:3px;width:fit-content}
+.ctr-mode-tab{padding:5px 16px;border-radius:8px;font-size:12px;font-family:inherit;border:none;background:none;color:var(--ink3);cursor:pointer;transition:all .12s;font-weight:400}
+.ctr-mode-tab.active{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+.ctr-start-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.ctr-start-row .field{margin-bottom:0;flex:1;min-width:140px}
+.ctr-timer-mins{width:90px}
+
+.ctr-active-list{display:flex;flex-direction:column;gap:10px}
+.ctr-active-card{position:relative;overflow:hidden;padding:16px 18px}
+.ctr-active-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--gold));animation:ctr-pulse 2s ease-in-out infinite}
+@keyframes ctr-pulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+.ctr-active-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ctr-active-track{font-size:12px;font-weight:500;color:var(--accent);background:var(--accent-bg);border:0.5px solid var(--accent-light);border-radius:20px;padding:3px 10px}
+.ctr-active-mode{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
+
+.ctr-display{font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:400;letter-spacing:-3px;line-height:1;text-align:center;padding:8px 0;color:var(--ink)}
+.ctr-display .sep{color:var(--ink3)}
+.ctr-display.countdown-warn{color:var(--gold)}
+.ctr-display.countdown-done{color:var(--red2)}
+
+.ctr-target-label{text-align:center;font-size:11px;color:var(--ink3);margin-bottom:8px}
+
+.ctr-active-actions{display:flex;gap:8px;justify-content:center}
+
+/* Today's counter totals */
+.ctr-today-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.ctr-today-chip{display:flex;align-items:center;gap:6px;padding:5px 12px;background:var(--surface2);border-radius:20px;font-size:12px}
+.ctr-today-chip .ctr-today-mins{font-weight:500;font-family:'JetBrains Mono',monospace}
+
+/* Recent counters */
+.ctr-recent{margin-top:14px}
+.ctr-recent-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:0.5px solid var(--border);font-size:12px}
+.ctr-recent-row:first-child{border-top:none}
+.ctr-recent-track{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctr-recent-dur{font-family:'JetBrains Mono',monospace;color:var(--ink2)}
+.ctr-recent-time{color:var(--ink3);font-size:11px;flex-shrink:0}
+
+/* Preset buttons for timer mode */
+.ctr-preset-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.ctr-preset{padding:3px 10px;border-radius:20px;font-size:11px;border:0.5px solid var(--border2);background:none;font-family:inherit;color:var(--ink2);cursor:pointer;transition:all .12s}
+.ctr-preset:hover,.ctr-preset.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
+
+@media (max-width:768px) {
+  .ctr-display{font-size:38px;letter-spacing:-2px}
+  .ctr-start-row{flex-direction:column}
+  .ctr-start-row .field{width:100%}
+}
+</style>
+
+<div class="ctr-widget">
+  <div class="sec-label">quick counter</div>
+
+  <!-- Active counters (shown when any are running) -->
+  <div id="ctr-active-list" class="ctr-active-list" style="display:none"></div>
+
+  <!-- Start form (shown when idle or adding another) -->
+  <div class="card" id="ctr-start-form">
+    <div class="ctr-mode-tabs">
+      <button class="ctr-mode-tab active" data-mode="stopwatch" onclick="ctrSwitchMode('stopwatch',this)">⏱ Stopwatch</button>
+      <button class="ctr-mode-tab" data-mode="timer" onclick="ctrSwitchMode('timer',this)">⏳ Timer</button>
+    </div>
+
+    <div class="ctr-start-row">
+      <div class="field">
+        <label class="fl">Track</label>
+        <select id="ctr-track-sel">
+          <option value="">- select -</option>
+        </select>
+      </div>
+      <div class="field" id="ctr-timer-field" style="display:none">
+        <label class="fl">Minutes</label>
+        <input type="number" id="ctr-target-mins" class="ctr-timer-mins" min="1" max="300" value="20" placeholder="20">
+        <div class="ctr-preset-row">
+          <button class="ctr-preset" onclick="ctrSetMins(5)">5m</button>
+          <button class="ctr-preset" onclick="ctrSetMins(10)">10m</button>
+          <button class="ctr-preset active" onclick="ctrSetMins(20)">20m</button>
+          <button class="ctr-preset" onclick="ctrSetMins(30)">30m</button>
+          <button class="ctr-preset" onclick="ctrSetMins(45)">45m</button>
+          <button class="ctr-preset" onclick="ctrSetMins(60)">60m</button>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm" onclick="ctrStart()" id="ctr-start-btn" style="height:38px;margin-bottom:0">Start</button>
+    </div>
+  </div>
+
+  <!-- Today's totals -->
+  <div class="ctr-today-row" id="ctr-today-totals"></div>
+
+  <!-- Recent completed counters -->
+  <div class="ctr-recent" id="ctr-recent" style="display:none">
+    <div class="sec-label" style="margin-top:10px">recent counters</div>
+    <div class="card" style="padding:8px 14px" id="ctr-recent-list"></div>
+  </div>
+</div>
+
+<script>
+// ── Counter widget state ──────────────────────────────────────────────────────
+var _ctrMode      = 'stopwatch';  // 'stopwatch' or 'timer'
+var _ctrActive    = [];           // active counter objects from server
+var _ctrIntervals = {};           // { counterId: intervalId }
+
+// ── Init (called when Stats page loads) ───────────────────────────────────────
+async function ctrInit() {
+  // Populate track dropdown
+  var sel = document.getElementById('ctr-track-sel');
+  if (sel && sel.options.length <= 1) {
+    (window.APP_TRACKS || []).forEach(function(t) {
+      var o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      sel.appendChild(o);
+    });
+  }
+
+  try {
+    // Load active counters, today's totals, and recent history in parallel
+    var results = await Promise.all([
+      api.call('getActiveCounters'),
+      api.call('getTodayCounterMinutes'),
+      api.call('getRecentCounters', 5)
+    ]);
+
+    _ctrActive = Array.isArray(results[0]) ? results[0] : [];
+    _ctrRenderActive();
+    _ctrRenderToday(results[1] || {});
+    _ctrRenderRecent(results[2] || []);
+  } catch (e) {
+    // Silent fail — widget is supplementary
+    console.error('Counter init error:', e);
+  }
+}
+
+// ── Mode switch ───────────────────────────────────────────────────────────────
+function ctrSwitchMode(mode, btn) {
+  _ctrMode = mode;
+  document.querySelectorAll('.ctr-mode-tab').forEach(function(t) {
+    t.classList.toggle('active', t.dataset.mode === mode);
+  });
+  document.getElementById('ctr-timer-field').style.display = mode === 'timer' ? '' : 'none';
+}
+
+function ctrSetMins(m) {
+  document.getElementById('ctr-target-mins').value = m;
+  document.querySelectorAll('.ctr-preset').forEach(function(b) {
+    b.classList.toggle('active', parseInt(b.textContent) === m);
+  });
+}
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+async function ctrStart() {
+  var track = document.getElementById('ctr-track-sel').value;
+  if (!track) { showToast('Select a track first'); return; }
+
+  var params = { track: track };
+  if (_ctrMode === 'timer') {
+    var mins = parseInt(document.getElementById('ctr-target-mins').value) || 20;
+    params.targetMinutes = mins;
+  }
+
+  var btn = document.getElementById('ctr-start-btn');
+  btn.disabled = true;
+  btn.textContent = 'Starting…';
+
+  try {
+    var res = await api.call('startCounter', params);
+    if (res && res.error) { showToast(res.error); return; }
+
+    // Add to active list and start ticking
+    _ctrActive.push({
+      id: res.id,
+      startTime: res.startTime,
+      track: track,
+      mode: res.mode,
+      targetMinutes: res.targetMinutes,
+      status: 'active',
+      elapsedSecs: 0
+    });
+
+    document.getElementById('ctr-track-sel').value = '';
+    _ctrRenderActive();
+    showToast('Counter started ✓');
+  } catch (e) {
+    showToast('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Start';
+  }
+}
+
+// ── Stop ──────────────────────────────────────────────────────────────────────
+async function ctrStop(counterId) {
+  // Stop the interval immediately
+  if (_ctrIntervals[counterId]) {
+    clearInterval(_ctrIntervals[counterId]);
+    delete _ctrIntervals[counterId];
+  }
+
+  try {
+    var res = await api.call('stopCounter', counterId);
+    if (res && res.error) { showToast(res.error); return; }
+
+    showToast('Saved — ' + res.durationMin + ' min logged');
+    _ctrActive = _ctrActive.filter(function(c) { return c.id !== counterId; });
+    _ctrRenderActive();
+
+    // Refresh today's totals and recent
+    var results = await Promise.all([
+      api.call('getTodayCounterMinutes'),
+      api.call('getRecentCounters', 5)
+    ]);
+    _ctrRenderToday(results[0] || {});
+    _ctrRenderRecent(results[1] || []);
+  } catch (e) {
+    showToast('Warning: ' + e.message);
+  }
+}
+
+async function ctrCancel(counterId) {
+  if (_ctrIntervals[counterId]) {
+    clearInterval(_ctrIntervals[counterId]);
+    delete _ctrIntervals[counterId];
+  }
+  try {
+    await api.call('cancelCounter', counterId);
+  } catch (e) { /* silent */ }
+
+  _ctrActive = _ctrActive.filter(function(c) { return c.id !== counterId; });
+  _ctrRenderActive();
+}
+
+// ── Render active counters ────────────────────────────────────────────────────
+function _ctrRenderActive() {
+  var el = document.getElementById('ctr-active-list');
+
+  if (_ctrActive.length === 0) {
+    el.style.display = 'none';
+    document.getElementById('ctr-start-form').style.display = '';
+    // Clear all intervals
+    Object.keys(_ctrIntervals).forEach(function(k) {
+      clearInterval(_ctrIntervals[k]);
+    });
+    _ctrIntervals = {};
+    return;
+  }
+
+  el.style.display = '';
+  // Keep start form visible so user can add more counters
+  document.getElementById('ctr-start-form').style.display = '';
+
+  el.innerHTML = _ctrActive.map(function(c) {
+    var displayId = 'ctr-disp-' + c.id;
+    var isTimer   = c.mode === 'timer' && c.targetMinutes;
+
+    var html = '<div class="card ctr-active-card">';
+    html += '<div class="ctr-active-top">';
+    html += '<span class="ctr-active-track">' + escHtml(c.track) + '</span>';
+    html += '<span class="ctr-active-mode">' + (isTimer ? '⏳ ' + c.targetMinutes + 'min timer' : '⏱ stopwatch') + '</span>';
+    html += '</div>';
+
+    if (isTimer) {
+      html += '<div class="ctr-target-label">counting down from ' + c.targetMinutes + ' min</div>';
+    }
+
+    html += '<div class="ctr-display" id="' + displayId + '">00<span class="sep">:</span>00</div>';
+
+    html += '<div class="ctr-active-actions">';
+    html += '<button class="btn btn--primary btn--sm" onclick="ctrStop(\'' + c.id + '\')">Stop & Save</button>';
+    html += '<button class="btn btn--ghost btn--sm" onclick="ctrCancel(\'' + c.id + '\')">Cancel</button>';
+    html += '</div>';
+    html += '</div>';
+    return html;
+  }).join('');
+
+  // Start/resume ticking for each active counter
+  _ctrActive.forEach(function(c) {
+    _ctrStartTicking(c);
+  });
+}
+
+function _ctrStartTicking(counter) {
+  // Clear existing interval if any
+  if (_ctrIntervals[counter.id]) {
+    clearInterval(_ctrIntervals[counter.id]);
+  }
+
+  var startMs = new Date(counter.startTime).getTime();
+  var isTimer = counter.mode === 'timer' && counter.targetMinutes;
+  var targetSecs = isTimer ? counter.targetMinutes * 60 : null;
+  var displayEl = document.getElementById('ctr-disp-' + counter.id);
+  if (!displayEl) return;
+
+  var tick = function() {
+    var elapsed = Math.floor((Date.now() - startMs) / 1000);
+    var display, secs;
+
+    if (isTimer) {
+      var remaining = targetSecs - elapsed;
+      if (remaining <= 0) {
+        // Timer expired — show overshoot in red
+        var over = Math.abs(remaining);
+        display = _ctrFmtTime(over);
+        displayEl.className = 'ctr-display countdown-done';
+        displayEl.innerHTML = '-' + display;
+        return;
+      }
+      if (remaining <= 60) {
+        displayEl.className = 'ctr-display countdown-warn';
+      }
+      display = _ctrFmtTime(remaining);
+    } else {
+      display = _ctrFmtTime(elapsed);
+    }
+
+    displayEl.innerHTML = display;
+  };
+
+  tick(); // immediate first render
+  _ctrIntervals[counter.id] = setInterval(tick, 1000);
+}
+
+function _ctrFmtTime(totalSecs) {
+  var h = Math.floor(totalSecs / 3600);
+  var m = Math.floor((totalSecs % 3600) / 60);
+  var s = totalSecs % 60;
+  var mm = String(m).padStart(2, '0');
+  var ss = String(s).padStart(2, '0');
+  if (h > 0) {
+    return h + '<span class="sep">:</span>' + mm + '<span class="sep">:</span>' + ss;
+  }
+  return mm + '<span class="sep">:</span>' + ss;
+}
+
+// ── Render today's totals ─────────────────────────────────────────────────────
+function _ctrRenderToday(data) {
+  var el = document.getElementById('ctr-today-totals');
+  var entries = Object.entries(data);
+  if (entries.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+
+  var total = entries.reduce(function(sum, e) { return sum + e[1]; }, 0);
+  var html = '<div class="ctr-today-chip"><span>📊 Today:</span> <span class="ctr-today-mins">' + total + 'm</span></div>';
+
+  entries.forEach(function(e) {
+    var dotClass = e[0].startsWith('German') ? 'g' : e[0].startsWith('IELTS') ? 'b' : 'gray';
+    html += '<div class="ctr-today-chip">';
+    html += '<span class="dot dot--' + dotClass + '" style="width:6px;height:6px"></span>';
+    html += '<span>' + escHtml(e[0]) + '</span>';
+    html += '<span class="ctr-today-mins">' + e[1] + 'm</span>';
+    html += '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+// ── Render recent counters ────────────────────────────────────────────────────
+function _ctrRenderRecent(list) {
+  var wrap = document.getElementById('ctr-recent');
+  var el   = document.getElementById('ctr-recent-list');
+  if (!list || list.length === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = '';
+  el.innerHTML = list.map(function(c) {
+    var timeLabel = _ctrTimeAgo(c.endTime);
+    return '<div class="ctr-recent-row">' +
+      '<span class="dot dot--' + (c.track.startsWith('German') ? 'g' : 'b') + '"></span>' +
+      '<span class="ctr-recent-track">' + escHtml(c.track) + '</span>' +
+      '<span class="ctr-recent-dur">' + c.durationMin + 'm</span>' +
+      '<span class="ctr-recent-time">' + timeLabel + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function _ctrTimeAgo(isoStr) {
+  if (!isoStr) return '';
+  var d = new Date(isoStr);
+  var now = new Date();
+  var diffMin = Math.round((now - d) / 60000);
+  if (diffMin < 1)  return 'just now';
+  if (diffMin < 60) return diffMin + 'm ago';
+  var diffHr = Math.round(diffMin / 60);
+  if (diffHr < 24) return diffHr + 'h ago';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+// ── Cleanup when leaving stats page ───────────────────────────────────────────
+function ctrDestroy() {
+  Object.keys(_ctrIntervals).forEach(function(k) {
+    clearInterval(_ctrIntervals[k]);
+  });
+  _ctrIntervals = {};
+}
+</script>

@@ -8,6 +8,7 @@ const SHEET_DASHBOARD = 'Dashboard';
 const SHEET_VOCABULARY = 'Vocabulary';
 const SHEET_LLM_LOG   = '_llmLog';
 const SHEET_PRACTICE = 'PracticeLog';
+const SHEET_COUNTERS = 'Counters';
 
 const SYLLABUS_SHEETS = {
   A1:    'German_A1',
@@ -88,6 +89,13 @@ const COL_PRAC = {
   SORT_ORDER: 9, NOTES: 10, ADDED_BY: 11, ADDED_ON: 12,
 };
 
+const COL_CTR = {
+  ID: 0, START_TIME: 1, END_TIME: 2, DURATION_MIN: 3,
+  TARGET_MINUTES: 4, TRACK: 5, MODE: 6, STATUS: 7,
+  NOTES: 8, CREATED_BY: 9,
+};
+
+
 const VOCAB_STATUSES = ['new', 'reviewed', 'known'];
 
 // ── Sheet headers ─────────────────────────────────────────────────────────────
@@ -113,6 +121,12 @@ const HDR_PRACTICE = [
   'id', 'type', 'parent_id', 'track', 'name',
   'status', 'due_date', 'completed_date', 'completed_by',
   'sort_order', 'notes', 'added_by', 'added_on'
+];
+
+const HDR_COUNTERS = [
+  'id', 'start_time', 'end_time', 'duration_min',
+  'target_minutes', 'track', 'mode', 'status',
+  'notes', 'created_by'
 ];
 
 const PRAC_STATUS_PENDING = 'pending';
