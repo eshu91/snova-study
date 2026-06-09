@@ -14,6 +14,8 @@ function runSetup() {
   createSheet_(ss, SHEET_SYS_LOG, HDR_SYS_LOG);
   createSheet_(ss, SHEET_VOCABULARY, HDR_VOCABULARY);
   createSheet_(ss, SHEET_LLM_LOG, HDR_LLM_LOG);
+  createSheet_(ss, SHEET_PRACTICE, HDR_PRACTICE);
+  createSheet_(ss, SHEET_COUNTERS, HDR_COUNTERS);
   createDashboardSheet_(ss);
 
   seedConfig_(ss);

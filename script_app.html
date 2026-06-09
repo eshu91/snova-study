@@ -6,6 +6,8 @@ function showPage(id, btn) {
   var p = document.getElementById('page-' + id);
   if (p) p.classList.add('active');
   if (btn) btn.classList.add('active');
+
+  if(id === 'practice' && typeof pracLoad === 'function') pracLoad();
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -393,6 +395,18 @@ document.querySelectorAll('.mood-btn').forEach(function(b) {
       }
     }
   } catch (e) { /* no active session */ }
+})();
+
+// ── Practice due badge ────────────────────────────────────────────────────────
+(async function loadPracticeDueBadge() {
+  try {
+    var items = await api.call('getUpcomingDueItems', 1);
+    var badge = document.getElementById('practice-due-badge');
+    if (badge && items && items.length > 0) {
+      badge.textContent = items.length + ' due';
+      badge.style.display = '';
+    }
+  } catch (e) { /* silent */ }
 })();
 
 // ── Initialise track dropdown to default workspace ────────────────────────────
