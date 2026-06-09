@@ -139,13 +139,14 @@ function getOwnerEmail_() {
 // ── Trigger installation ──────────────────────────────────────────────────────
 
 function installTriggers_() {
-  const managed = ['morningRefresh','dailyCheck','weeklySummary',
+  const managed = ['morningRefresh','morningBriefing','dailyCheck','weeklySummary',
                    'checkStaleSessions','phaseTransitionCheck','pruneSystemLog'];
   ScriptApp.getProjectTriggers().forEach(t => {
     if (managed.includes(t.getHandlerFunction())) ScriptApp.deleteTrigger(t);
   });
 
   ScriptApp.newTrigger('morningRefresh').timeBased().atHour(5).everyDays(1).create();
+  ScriptApp.newTrigger('morningBriefing').timeBased().atHour(6).everyDays(1).create();
   ScriptApp.newTrigger('checkStaleSessions').timeBased().everyHours(1).create();
   ScriptApp.newTrigger('dailyCheck').timeBased().atHour(22).everyDays(1).create();
   ScriptApp.newTrigger('weeklySummary')

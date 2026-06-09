@@ -175,6 +175,158 @@ function sendPhaseTransitionAlert_(config) {
   });
 }
 
+/**
+ * Morning briefing email with practice items due today/tomorrow and overdue.
+ * Only sends if there are items to show — silent otherwise (non-shaming).
+ * Called by morningBriefing() trigger at 6:00 AM NPT.
+ */
+function sendMorningBriefing_(config) {
+  const name  = config.user_name || 'there';
+  const notif = config.notification_email || config.owner_email;
+  if (!notif) return { sent: false, reason: 'no email' };
+ 
+  // Gather practice items: overdue + due today + due tomorrow
+  const dueItems = getUpcomingDueItems(1); // today + tomorrow
+  if (!dueItems || dueItems.length === 0) return { sent: false, reason: 'nothing due' };
+ 
+  const overdue  = dueItems.filter(function(it) { return it.isOverdue; });
+  const dueToday = dueItems.filter(function(it) {
+    if (it.isOverdue) return false;
+    var d = new Date(it.dueDate);
+    var today = new Date(); today.setHours(0,0,0,0);
+    d.setHours(0,0,0,0);
+    return d.getTime() === today.getTime();
+  });
+  const dueTomorrow = dueItems.filter(function(it) {
+    if (it.isOverdue) return false;
+    var d = new Date(it.dueDate);
+    var today = new Date(); today.setHours(0,0,0,0);
+    var tmrw = new Date(today); tmrw.setDate(tmrw.getDate() + 1);
+    d.setHours(0,0,0,0);
+    return d.getTime() === tmrw.getTime();
+  });
+ 
+  // IELTS countdown
+  const days = getDaysUntilIELTS();
+  const countdownHtml = (days && days > 0 && config.phase === PHASE_PRE_IELTS)
+    ? '<div style="background:#e6f0fb;border-radius:8px;padding:12px 16px;margin:0 0 18px;display:flex;align-items:center;gap:12px">' +
+      '<div style="font-size:32px;font-weight:700;color:#1a4580;line-height:1;flex-shrink:0">' + days + '</div>' +
+      '<div><div style="font-size:12px;font-weight:600;color:#1a4580">days until IELTS</div>' +
+      '<div style="font-size:10px;color:#2d6bcc;margin-top:2px">' + _esc_(config.ielts_test_date) + '</div></div>' +
+      '</div>'
+    : '';
+ 
+  // Practice summary
+  var pracSummary;
+  try { pracSummary = getPracticeSummary(); } catch (e) { pracSummary = null; }
+ 
+  // Build the practice items sections
+  var practiceHtml = '';
+ 
+  if (overdue.length > 0) {
+    practiceHtml += '<div style="margin-bottom:16px">';
+    practiceHtml += '<div style="font-size:12px;font-weight:600;color:#c04040;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⚠ Overdue</div>';
+    practiceHtml += _pracItemTable_(overdue, '#fbeaea', '#f0b8b8', '#8c2020');
+    practiceHtml += '</div>';
+  }
+ 
+  if (dueToday.length > 0) {
+    practiceHtml += '<div style="margin-bottom:16px">';
+    practiceHtml += '<div style="font-size:12px;font-weight:600;color:#1a4580;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📋 Due today</div>';
+    practiceHtml += _pracItemTable_(dueToday, '#e6f0fb', '#aac8f0', '#1a4580');
+    practiceHtml += '</div>';
+  }
+ 
+  if (dueTomorrow.length > 0) {
+    practiceHtml += '<div style="margin-bottom:16px">';
+    practiceHtml += '<div style="font-size:12px;font-weight:600;color:#6b6560;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔜 Due tomorrow</div>';
+    practiceHtml += _pracItemTable_(dueTomorrow, '#f5f3ef', '#e2ddd7', '#6b6560');
+    practiceHtml += '</div>';
+  }
+ 
+  // Overall progress line (if available)
+  var progressHtml = '';
+  if (pracSummary && pracSummary.total && pracSummary.total.entered > 0) {
+    var pct = Math.round(pracSummary.total.completed / pracSummary.total.entered * 100);
+    progressHtml = '<div style="background:#ebf4e2;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:13px;color:#2d5016">' +
+      '📊 Overall: <strong>' + pracSummary.total.completed + '</strong> of <strong>' + pracSummary.total.entered + '</strong> practice items complete (' + pct + '%)' +
+      '</div>';
+  }
+ 
+  // Greeting — time-aware
+  var hr = new Date().getHours();
+  var greeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+ 
+  var totalDue = overdue.length + dueToday.length + dueTomorrow.length;
+ 
+  var body =
+    '<p style="font-size:13px;font-weight:500;color:#a89f95;margin:0 0 4px;text-transform:uppercase;letter-spacing:.6px">' +
+      greeting +
+    '</p>' +
+    '<p style="font-size:21px;font-weight:700;margin:0 0 18px;letter-spacing:-0.3px;color:#1c1a17">' +
+      _esc_(name) + ', here\'s your practice update' +
+    '</p>' +
+    countdownHtml +
+    progressHtml +
+    practiceHtml +
+    _ctaBtn_('Open Practice →');
+ 
+  // Subject line
+  var subjectParts = [];
+  if (overdue.length > 0)    subjectParts.push(overdue.length + ' overdue');
+  if (dueToday.length > 0)   subjectParts.push(dueToday.length + ' due today');
+  if (dueTomorrow.length > 0) subjectParts.push(dueTomorrow.length + ' due tomorrow');
+  var subject = '📋 ' + subjectParts.join(', ') + ' — lernen / track';
+ 
+  MailApp.sendEmail({
+    to:       notif,
+    subject:  subject,
+    htmlBody: _wrap_(body, _footerLine_(config)),
+  });
+ 
+  return { sent: true, count: totalDue };
+}
+ 
+/**
+ * Renders a small table of practice items for the email.
+ * Each item shows: name, track, due date.
+ */
+function _pracItemTable_(items, bgColor, borderColor, textColor) {
+  var html = '<div style="background:' + bgColor + ';border-radius:8px;border:0.5px solid ' + borderColor + ';overflow:hidden">';
+  items.forEach(function(it, idx) {
+    var border = idx > 0 ? 'border-top:0.5px solid ' + borderColor + ';' : '';
+    var typeIcon = it.type === 'resource' ? '📁' : '☐';
+    var trackLabel = it.track ? '<span style="font-size:10px;color:' + textColor + ';opacity:.7;margin-left:6px">' + it.track + '</span>' : '';
+ 
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;' + border + '">';
+    html += '<span style="flex-shrink:0">' + typeIcon + '</span>';
+    html += '<span style="flex:1;color:#1c1a17">' + _esc_(it.name) + trackLabel + '</span>';
+    if (it.dueDate) {
+      html += '<span style="font-size:11px;color:' + textColor + ';font-weight:500;white-space:nowrap">' + _fmtDueLabel_(it.dueDate) + '</span>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+ 
+/**
+ * Formats a due date into a human label for emails.
+ */
+function _fmtDueLabel_(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  var today = new Date(); today.setHours(0,0,0,0);
+  d.setHours(0,0,0,0);
+  var diff = Math.round((d - today) / 86400000);
+  if (diff === 0) return 'today';
+  if (diff === 1) return 'tomorrow';
+  if (diff < 0) return Math.abs(diff) + 'd overdue';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+
 // ── Private helpers ───────────────────────────────────────────────────────────
 
 function _wrap_(bodyHtml, footerHtml) {
