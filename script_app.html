@@ -63,28 +63,46 @@ function doSearch(q) {
   _searchTimer = setTimeout(async function() {
     try {
       var items = await api.call('searchTopics', q.trim());
-      if (!items || items.length === 0) {
-        results.innerHTML =
-          '<div style="padding:24px 18px;text-align:center;font-size:13px;color:var(--ink3)">' +
-          'No topics found for \u201c<strong>' + escHtml(q) + '</strong>\u201d</div>';
-        return;
+      var html = '';
+      if (items && items.length > 0) {
+        html += '<div class="search-section-lbl">Topics (' + items.length + ')</div>';
+        items.forEach(function(t) {
+          var levelLabel = t.level === 'IELTS' ? 'IELTS' : 'German ' + t.level;
+          var pillCls = ({ 'Not started':'pill--ns','Learning':'pill--l','Mastered':'pill--m' })[t.status] || 'pill--ns';
+          var dotCls  = ({ 'Not started':'dot--gray','Learning':'dot--y','Mastered':'dot--g' })[t.status] || 'dot--gray';
+          var safeLevel = t.level.replace(/'/g, "\\'");
+          html += '<div class="search-result" onclick="closeSearch();showPage(\'syllabus\',document.getElementById(\'nav-syllabus\'));sylLoad(\'' + safeLevel + '\')">' +
+            '<div class="search-result-icon" style="background:var(--surface2)"><span class="dot ' + dotCls + '" style="width:10px;height:10px"></span></div>' +
+            '<div style="flex:1;min-width:0"><div class="search-result-name">' + escHtml(t.topic) + '</div>' +
+            '<div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="font-size:10px;color:var(--ink3)">' + escHtml(levelLabel) + '</span>' +
+            '<span class="pill ' + pillCls + '" style="font-size:10px;padding:1px 6px">' + t.status + '</span></div></div></div>';
+        });
       }
-      var html = '<div class="search-section-lbl">Topics (' + items.length + ')</div>';
-      items.forEach(function(t) {
-        var levelLabel = t.level === 'IELTS' ? 'IELTS' : 'German ' + t.level;
-        var pillCls = ({ 'Not started':'pill--ns','Learning':'pill--l','Mastered':'pill--m' })[t.status] || 'pill--ns';
-        var dotCls  = ({ 'Not started':'dot--gray','Learning':'dot--y','Mastered':'dot--g' })[t.status] || 'dot--gray';
-        var safeLevel = t.level.replace(/'/g, "\\'");
-        html += '<div class="search-result" onclick="closeSearch();showPage(\'syllabus\',document.getElementById(\'nav-syllabus\'));sylLoad(\'' + safeLevel + '\')">' +
-          '<div class="search-result-icon" style="background:var(--surface2)"><span class="dot ' + dotCls + '" style="width:10px;height:10px"></span></div>' +
-          '<div style="flex:1;min-width:0"><div class="search-result-name">' + escHtml(t.topic) + '</div>' +
-          '<div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="font-size:10px;color:var(--ink3)">' + escHtml(levelLabel) + '</span>' +
-          '<span class="pill ' + pillCls + '" style="font-size:10px;padding:1px 6px">' + t.status + '</span></div></div></div>';
-      });
+      // Also search vocab words
+      try {
+        var vocabItems = await api.call('searchVocab', q.trim());
+        if (vocabItems && vocabItems.length > 0) {
+          html += '<div class="search-section-lbl">Vocab (' + vocabItems.length + ')</div>';
+          vocabItems.forEach(function(v) {
+            var dotCls = v.track.indexOf('German') === 0 ? 'dot--g' : 'dot--b';
+            html += '<div class="search-result" onclick="closeSearch();showPage(\'vocab\',document.getElementById(\'nav-vocab\'))">' +
+              '<div class="search-result-icon" style="background:var(--teal-bg)"><span class="dot ' + dotCls + '" style="width:10px;height:10px"></span></div>' +
+              '<div style="flex:1;min-width:0"><div class="search-result-name">' + escHtml(v.word) + '</div>' +
+              '<div style="font-size:11px;color:var(--ink3);margin-top:2px">' + escHtml((v.meaning||'').slice(0,50)) + '</div></div></div>';
+          });
+        }
+      } catch (e) { /* vocab search optional */ }
+
+      if (!html) {
+        html = '<div style="padding:24px 18px;text-align:center;font-size:13px;color:var(--ink3)">' +
+          'Nothing found for \u201c<strong>' + escHtml(q) + '</strong>\u201d</div>';
+      }
       results.innerHTML = html;
     } catch (e) {
       results.innerHTML = '<div style="padding:14px 18px;font-size:12px;color:var(--red2)">Error: ' + escHtml(e.message) + '</div>';
     }
+
+
   }, 300);
 }
 
@@ -99,6 +117,9 @@ function _searchDefault_() {
     '<div class="search-result" onclick="closeSearch();showPage(\'syllabus\',document.getElementById(\'nav-syllabus\'));openNewTopicModal()">' +
       '<div class="search-result-icon" style="background:var(--surface2)">➕</div>' +
       '<div><div class="search-result-name">Add a new topic</div><div class="search-result-sub">Open topic creator</div></div></div>' +
+    '<div class="search-result" onclick="closeSearch();showPage(\'vocab\',document.getElementById(\'nav-vocab\'))">' +
+      '<div class="search-result-icon" style="background:var(--teal-bg)">📝</div>' +
+      '<div><div class="search-result-name">Add a vocab word</div><div class="search-result-sub">Vocab \u2192 add + AI enrich</div></div></div>' +
     '<div class="search-result" onclick="closeSearch();showPage(\'stats\',document.getElementById(\'nav-stats\'))">' +
       '<div class="search-result-icon" style="background:var(--gold-bg)">📊</div>' +
       '<div><div class="search-result-name">View stats</div><div class="search-result-sub">Study summary and progress</div></div></div>' +
@@ -141,6 +162,14 @@ function switchWorkspace(el, name, icon, bg) {
   var level = WORKSPACE_DEFAULT_LEVEL[name];
   if (level && document.getElementById('page-syllabus').classList.contains('active')) {
     if (typeof sylLoad === 'function') sylLoad(level);
+  }
+  // Update vocab track dropdown when workspace changes
+// Update vocab page when workspace changes
+  if (typeof vocabUpdateTrackDropdown === 'function') {
+    vocabUpdateTrackDropdown();
+    if (document.getElementById('page-vocab').classList.contains('active')) {
+      vocabLoadRecent();
+    }
   }
 
   if (!WORKSPACE_TRACKS[name]) showToast(name + ' \u2014 coming soon');

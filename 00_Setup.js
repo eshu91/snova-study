@@ -12,6 +12,8 @@ function runSetup() {
   createSheet_(ss, SHEET_DAILY_LOG, HDR_DAILY_LOG);
   createSheet_(ss, SHEET_AUDIT_LOG, HDR_AUDIT_LOG);
   createSheet_(ss, SHEET_SYS_LOG, HDR_SYS_LOG);
+  createSheet_(ss, SHEET_VOCABULARY, HDR_VOCABULARY);
+  createSheet_(ss, SHEET_LLM_LOG, HDR_LLM_LOG);
   createDashboardSheet_(ss);
 
   seedConfig_(ss);
@@ -20,6 +22,9 @@ function runSetup() {
 
   const sysLog = ss.getSheetByName(SHEET_SYS_LOG);
   if (sysLog) sysLog.hideSheet();
+
+  const llmLog = ss.getSheetByName(SHEET_LLM_LOG);
+  if (llmLog) llmLog.hideSheet();
 
   console.log('runSetup() complete. Next: run populateIELTSSyllabus().');
 }
@@ -67,6 +72,10 @@ function seedConfig_(ss) {
     stale_session_hours: 'Hours before an active timer is considered stale',
     theme: 'auto | light | dark',
     web_app_version: 'Set by runSetup(); shown in Settings',
+    llm_provider: 'openrouter | gemini | openai | custom',
+    llm_api_key: 'API key for vocab enrichment (server-side only)',
+    llm_model: 'Model identifier (e.g. meta-llama/llama-3.1-8b-instruct:free)',
+    llm_base_url: 'OpenAI-compatible chat completions endpoint',
   };
 
   Object.entries(CONFIG_DEFAULTS).forEach(([key, val]) => {
