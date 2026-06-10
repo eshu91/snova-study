@@ -112,6 +112,9 @@ var _ctrIntervals = {};           // { counterId: intervalId }
 // ── Init (called when Stats page loads) ───────────────────────────────────────
 async function ctrInit() {
   // Populate track dropdown
+  var widget = document.querySelector('.ctr-widget');
+  var slot   = document.getElementById('counter-slot');
+  if (widget && slot && !slot.contains(widget)) slot.appendChild(widget);
   var sel = document.getElementById('ctr-track-sel');
   if (sel && sel.options.length <= 1) {
     (window.APP_TRACKS || []).forEach(function(t) {
