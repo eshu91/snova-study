@@ -1,14 +1,17 @@
 <script>
 // ── Navigation ────────────────────────────────────────────────────────────────
 function showPage(id, btn) {
+  if (typeof ctrDestroy === 'function') ctrDestroy();
+
   document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(b) { b.classList.remove('active'); });
   var p = document.getElementById('page-' + id);
   if (p) p.classList.add('active');
   if (btn) btn.classList.add('active');
 
+  if (id === 'today' && typeof ctrInit === 'function') ctrInit();
   if(id === 'practice' && typeof pracLoad === 'function') pracLoad();
-  if(id === 'stats' && typeof statsLoad === 'function') statsLoad();
+  // if(id === 'stats' && typeof statsLoad === 'function') statsLoad();
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────

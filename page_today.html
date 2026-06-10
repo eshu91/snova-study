@@ -56,6 +56,7 @@
           <button class="btn btn--danger btn--full" style="height:42px" onclick="stopTimer()">Stop &amp; save</button>
         </div>
       </div>
+      <div id="counter-slot"></div>
 
       <!-- Reflection -->
       <div class="card card--gold" style="margin-top:14px">
@@ -228,4 +229,7 @@ async function saveQualityRating() {
       </div>`).join('');
   } catch (e) { /* keep loading state */ }
 })();
+
+if (typeof ctrInit === 'function') ctrInit();
+
 </script>
