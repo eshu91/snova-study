@@ -146,21 +146,19 @@ var _vocabBrowseTrack  = 'all';
 var _vocabBrowseStatus = 'all';
 
 // ── Init (called on page load) ───────────────────────────────────────────────
-(async function vocabInit() {
+// Deferred init — called by showPage() or after script_app.html loads
+async function vocabInit() {
   vocabUpdateTrackDropdown();
-
-  // Check if API key is configured
   var key = (window.APP_CONFIG || {}).llm_api_key;
   if (!key) document.getElementById('vocab-api-warn').style.display = 'block';
-
   await vocabLoadRecent();
   await vocabLoadStats();
-})();
+}
 
 // ── Track dropdown: workspace-aware ──────────────────────────────────────────
 function vocabUpdateTrackDropdown() {
   var ws     = window._activeWorkspace || 'German';
-  var tracks = WORKSPACE_TRACKS[ws];
+  var tracks = (typeof WORKSPACE_TRACKS !== 'undefined') ? WORKSPACE_TRACKS[ws] : null;
   var sel    = document.getElementById('vocab-track');
   if (!sel || !tracks) return;
   sel.innerHTML = tracks.map(function(t) { return '<option>' + escHtml(t) + '</option>'; }).join('');
@@ -253,7 +251,8 @@ async function vocabSaveNote(vocabId) {
 // ── Load recent words (workspace-filtered) ───────────────────────────────────
 async function vocabLoadRecent() {
   var ws     = window._activeWorkspace || 'German';
-  var tracks = WORKSPACE_TRACKS[ws] || [];
+  var tracks = (typeof WORKSPACE_TRACKS !== 'undefined') ? (WORKSPACE_TRACKS[ws] || []) : [];
+
   var list   = document.getElementById('vocab-recent-list');
 
   try {

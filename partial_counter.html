@@ -112,12 +112,19 @@ var _ctrIntervals = {};           // { counterId: intervalId }
 // ── Init (called when Stats page loads) ───────────────────────────────────────
 async function ctrInit() {
   // Populate track dropdown
-  var widget = document.querySelector('.ctr-widget');
+var widget = document.querySelector('.ctr-widget');
   var slot   = document.getElementById('counter-slot');
   if (widget && slot && !slot.contains(widget)) slot.appendChild(widget);
+
+  // Use workspace-filtered tracks, fall back to all
+  var ws     = window._activeWorkspace || 'German';
+  var tracks = (typeof WORKSPACE_TRACKS !== 'undefined') ? WORKSPACE_TRACKS[ws] : (window.APP_TRACKS || []);
+
   var sel = document.getElementById('ctr-track-sel');
-  if (sel && sel.options.length <= 1) {
-    (window.APP_TRACKS || []).forEach(function(t) {
+  if (sel) {
+    // Clear existing options beyond the placeholder
+    while (sel.options.length > 1) sel.remove(1);
+    tracks.forEach(function(t) {
       var o = document.createElement('option');
       o.value = t; o.textContent = t;
       sel.appendChild(o);
@@ -406,4 +413,33 @@ function ctrDestroy() {
   });
   _ctrIntervals = {};
 }
+
+// ── Keyboard shortcuts for counter ────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  // Only fire when counter widget is visible (Today page active)
+  var todayPage = document.getElementById('page-today');
+  if (!todayPage || !todayPage.classList.contains('active')) return;
+
+  // Don't fire inside inputs/textareas/selects
+  var tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+  // Ctrl/Cmd + Shift + S → Start counter (if idle) or Stop first active counter
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    if (_ctrActive.length > 0) {
+      ctrStop(_ctrActive[0].id);
+    } else {
+      ctrStart();
+    }
+    return;
+  }
+
+  // Ctrl/Cmd + Shift + X → Cancel first active counter
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'x') {
+    e.preventDefault();
+    if (_ctrActive.length > 0) ctrCancel(_ctrActive[0].id);
+    return;
+  }
+});
 </script>
