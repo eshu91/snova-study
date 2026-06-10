@@ -14,6 +14,8 @@ function runSetup() {
   createSheet_(ss, SHEET_SYS_LOG, HDR_SYS_LOG);
   createSheet_(ss, SHEET_VOCABULARY, HDR_VOCABULARY);
   createSheet_(ss, SHEET_LLM_LOG, HDR_LLM_LOG);
+  createSheet_(ss, SHEET_PRACTICE, HDR_PRACTICE);
+  createSheet_(ss, SHEET_COUNTERS, HDR_COUNTERS);
   createDashboardSheet_(ss);
 
   seedConfig_(ss);
@@ -25,6 +27,9 @@ function runSetup() {
 
   const llmLog = ss.getSheetByName(SHEET_LLM_LOG);
   if (llmLog) llmLog.hideSheet();
+
+  const ctrLog = ss.getSheetByName(SHEET_COUNTERS);
+  if (ctrLog) ctrLog.hideSheet();
 
   console.log('runSetup() complete. Next: run populateIELTSSyllabus().');
 }
@@ -137,13 +142,14 @@ function getOwnerEmail_() {
 // ── Trigger installation ──────────────────────────────────────────────────────
 
 function installTriggers_() {
-  const managed = ['morningRefresh','dailyCheck','weeklySummary',
+  const managed = ['morningRefresh','morningBriefing','dailyCheck','weeklySummary',
                    'checkStaleSessions','phaseTransitionCheck','pruneSystemLog'];
   ScriptApp.getProjectTriggers().forEach(t => {
     if (managed.includes(t.getHandlerFunction())) ScriptApp.deleteTrigger(t);
   });
 
   ScriptApp.newTrigger('morningRefresh').timeBased().atHour(5).everyDays(1).create();
+  ScriptApp.newTrigger('morningBriefing').timeBased().atHour(6).everyDays(1).create();
   ScriptApp.newTrigger('checkStaleSessions').timeBased().everyHours(1).create();
   ScriptApp.newTrigger('dailyCheck').timeBased().atHour(22).everyDays(1).create();
   ScriptApp.newTrigger('weeklySummary')

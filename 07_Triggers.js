@@ -16,6 +16,38 @@ function morningRefresh() {
   }
 }
 
+/**
+ * Morning briefing — fires daily at 6:00 AM NPT.
+ * Sends an email ONLY if there are practice items due (overdue, today, tomorrow).
+ * Silent if nothing is due. Non-shaming, per design principles.
+ *
+ * This is separate from:
+ *   - morningRefresh (5 AM, system maintenance: stale session cleanup)
+ *   - dailyCheck (10 PM, evening nudge if she didn't study)
+ */
+function morningBriefing() {
+  try {
+    const config = getConfigAll();
+    const notif  = config.notification_email || config.owner_email;
+ 
+    if (!notif) {
+      writeSystemLog('morningBriefing', 'error', 'No notification_email set in Config');
+      return;
+    }
+ 
+    const result = sendMorningBriefing_(config);
+ 
+    if (result.sent) {
+      writeSystemLog('morningBriefing', 'sent',
+        result.count + ' practice item(s) due — email sent to ' + notif);
+    } else {
+      writeSystemLog('morningBriefing', 'skipped', result.reason || 'Nothing due');
+    }
+  } catch (e) {
+    writeSystemLog('morningBriefing', 'error', e.message);
+  }
+}
+
 function dailyCheck() {
   try {
     const config    = getConfigAll();

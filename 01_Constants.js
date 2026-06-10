@@ -7,6 +7,8 @@ const SHEET_SYS_LOG   = '_systemLog';
 const SHEET_DASHBOARD = 'Dashboard';
 const SHEET_VOCABULARY = 'Vocabulary';
 const SHEET_LLM_LOG   = '_llmLog';
+const SHEET_PRACTICE = 'PracticeLog';
+const SHEET_COUNTERS = 'Counters';
 
 const SYLLABUS_SHEETS = {
   A1:    'German_A1',
@@ -81,6 +83,19 @@ const COL_LLM = {
   STATUS: 6, LATENCY_MS: 7, ERROR_DETAIL: 8,
 };
 
+const COL_PRAC = {
+  ID: 0, TYPE: 1, PARENT_ID: 2, TRACK: 3, NAME: 4,
+  STATUS: 5, DUE_DATE: 6, COMPLETED_DATE: 7, COMPLETED_BY: 8,
+  SORT_ORDER: 9, NOTES: 10, ADDED_BY: 11, ADDED_ON: 12,
+};
+
+const COL_CTR = {
+  ID: 0, START_TIME: 1, END_TIME: 2, DURATION_MIN: 3,
+  TARGET_MINUTES: 4, TRACK: 5, MODE: 6, STATUS: 7,
+  NOTES: 8, CREATED_BY: 9,
+};
+
+
 const VOCAB_STATUSES = ['new', 'reviewed', 'known'];
 
 // ── Sheet headers ─────────────────────────────────────────────────────────────
@@ -101,6 +116,22 @@ const HDR_VOCABULARY = ['vocab_id','word','track','meaning','synonyms','antonyms
 const HDR_LLM_LOG   = ['timestamp','vocab_id','model','provider',
                         'prompt_tokens','completion_tokens','status',
                         'latency_ms','error_detail'];
+
+const HDR_PRACTICE = [
+  'id', 'type', 'parent_id', 'track', 'name',
+  'status', 'due_date', 'completed_date', 'completed_by',
+  'sort_order', 'notes', 'added_by', 'added_on'
+];
+
+const HDR_COUNTERS = [
+  'id', 'start_time', 'end_time', 'duration_min',
+  'target_minutes', 'track', 'mode', 'status',
+  'notes', 'created_by'
+];
+
+const PRAC_STATUS_PENDING = 'pending';
+const PRAC_STATUS_DONE    = 'done';
+
 
 // ── Config defaults ───────────────────────────────────────────────────────────
 const CONFIG_DEFAULTS = {

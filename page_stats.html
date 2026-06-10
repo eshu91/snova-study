@@ -6,6 +6,9 @@
     </div>
   </div>
 
+  <!-- Counter widget (stopwatch + timer) -->
+  <?!= include('partial_counter') ?>
+
   <!-- Summary -->
   <div class="g4" style="margin-bottom:22px">
     <div class="card">
@@ -27,6 +30,14 @@
       <div class="sb-lbl">streak</div>
       <div class="sb-val" id="st-streak">- 🔥</div>
       <div class="sb-unit">days</div>
+    </div>
+  </div>
+
+  <!-- Practice progress widget -->
+  <div class="sec-label">practice progress</div>
+  <div class="g4" style="margin-bottom:22px" id="stats-practice-summary">
+    <div class="card" style="text-align:center;padding:12px">
+      <div style="font-size:12px;color:var(--ink3)">Loading…</div>
     </div>
   </div>
 
@@ -136,12 +147,15 @@ const _fmtMins = m =>
 
 // ── Load ──────────────────────────────────────────────────────────────────────
 async function statsLoad() {
+  if (typeof ctrInit === 'function') ctrInit();
+  
   try {
-    const [summary, chartData, candidates, goalsData] = await Promise.all([
+    const [summary, chartData, candidates, goalsData, pracSum ] = await Promise.all([
       api.call('getStatsSummary'),
       api.call('getChartData'),
       api.call('getReviewCandidates'),
       api.call('getWeeklyGoalsData'),
+      api.call('getPracticeSummary'),
     ]);
 
     _stGoals = goalsData || { intentions: {}, progress: {} };
@@ -153,6 +167,7 @@ async function statsLoad() {
     _stRenderHeatmap((chartData || {}).heatmap || {});
     _stRenderGoals(_stGoals.intentions, _stGoals.progress);
     _stRenderCandidates(candidates || []);
+_stRenderPractice(pracSum || { tracks: {}, total: { entered: 0, completed: 0 } });
   } catch (e) {
     showToast('Error loading stats: ' + e.message);
   }
@@ -281,6 +296,46 @@ function _stRenderCandidates(candidates) {
     badge.textContent  = candidates.length + (candidates.length === 1 ? ' review' : ' reviews');
     badge.style.display = '';
   }
+}
+
+function _stRenderPractice(summary) {
+  var el = document.getElementById('stats-practice-summary');
+  if (!el) return;
+
+  var tracks = summary.tracks || {};
+  var keys   = Object.keys(tracks);
+  var total  = summary.total || { entered: 0, completed: 0 };
+
+  if (total.entered === 0) {
+    el.innerHTML =
+      '<div class="card" style="text-align:center;padding:14px;grid-column:1/-1">' +
+      '<div style="font-size:12px;color:var(--ink3)">No practice items yet — add some in the Practice page</div>' +
+      '</div>';
+    return;
+  }
+
+  var html = '';
+  // Total card
+  var totalPct = total.entered > 0 ? Math.round(total.completed / total.entered * 100) : 0;
+  html += '<div class="card" style="text-align:center;padding:12px">';
+  html += '<div class="sb-lbl">total</div>';
+  html += '<div style="font-size:20px;font-weight:500;margin:4px 0">' + total.completed + '/' + total.entered + '</div>';
+  html += '<div class="prac-prog-bar" style="margin:4px auto 0;max-width:80px"><div class="prac-prog-fill" style="width:' + totalPct + '%"></div></div>';
+  html += '</div>';
+
+  // Per-track cards (top 3 by item count)
+  keys.sort(function(a, b) { return tracks[b].entered - tracks[a].entered; });
+  keys.slice(0, 3).forEach(function(t) {
+    var d = tracks[t];
+    var pct = d.entered > 0 ? Math.round(d.completed / d.entered * 100) : 0;
+    html += '<div class="card" style="text-align:center;padding:12px;cursor:pointer" onclick="showPage(\'practice\',document.getElementById(\'nav-practice\'))">';
+    html += '<div class="sb-lbl">' + t + '</div>';
+    html += '<div style="font-size:18px;font-weight:500;margin:4px 0">' + d.completed + '/' + d.entered + '</div>';
+    html += '<div class="prac-prog-bar" style="margin:4px auto 0;max-width:80px"><div class="prac-prog-fill" style="width:' + pct + '%"></div></div>';
+    html += '</div>';
+  });
+
+  el.innerHTML = html;
 }
 
 // ── Intentions modal ──────────────────────────────────────────────────────────
