@@ -287,17 +287,16 @@ function sendMorningBriefing_(config) {
   return { sent: true, count: totalDue };
 }
  
-/**
- * Renders a small table of practice items for the email.
- * Each item shows: name, track, due date.
- */
+
 function _pracItemTable_(items, bgColor, borderColor, textColor) {
   var html = '<div style="background:' + bgColor + ';border-radius:8px;border:0.5px solid ' + borderColor + ';overflow:hidden">';
   items.forEach(function(it, idx) {
     var border = idx > 0 ? 'border-top:0.5px solid ' + borderColor + ';' : '';
-    var typeIcon = it.type === 'resource' ? '📁' : '☐';
-    var trackLabel = it.track ? '<span style="font-size:10px;color:' + textColor + ';opacity:.7;margin-left:6px">' + it.track + '</span>' : '';
- 
+    var icons = { book: '\uD83D\uDCD6', test: '\uD83D\uDCDD', module: '\uD83D\uDCC2', section: '\u2610' };
+    var typeIcon = icons[it.type] || '\u2610';
+    var trackLabel = it.track
+      ? '<span style="font-size:10px;color:' + textColor + ';opacity:.7;margin-left:6px">' + _esc_(it.track) + '</span>'
+      : '';
     html += '<div style="display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;' + border + '">';
     html += '<span style="flex-shrink:0">' + typeIcon + '</span>';
     html += '<span style="flex:1;color:#1c1a17">' + _esc_(it.name) + trackLabel + '</span>';
@@ -309,7 +308,9 @@ function _pracItemTable_(items, bgColor, borderColor, textColor) {
   html += '</div>';
   return html;
 }
- 
+
+
+
 /**
  * Formats a due date into a human label for emails.
  */

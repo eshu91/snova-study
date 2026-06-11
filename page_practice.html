@@ -1,74 +1,102 @@
 <!-- ═══════════════════════════════════════════════════════════════════════════
-     page_practice.html — Practice Tracker page
-     Track books/tests → passages/tasks with check-off, due dates, progress
+     page_practice.html — Practice Tracker (4-level: Book → Test → Module → Section)
      ═══════════════════════════════════════════════════════════════════════════ -->
 
 <style>
-/* ── Practice page styles ── */
+/* ── Tabs & summary ── */
 .prac-track-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px}
 .prac-ttab{padding:5px 14px;border-radius:20px;font-size:12px;border:0.5px solid var(--border2);background:none;cursor:pointer;font-family:inherit;color:var(--ink2);transition:all .12s}
 .prac-ttab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .prac-ttab:hover:not(.active){background:var(--surface2)}
-.prac-ttab .prac-ttab-count{font-size:10px;opacity:.7;margin-left:3px}
-
+.prac-ttab-count{font-size:10px;opacity:.7;margin-left:3px}
 .prac-summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
 .prac-summary-card{text-align:center;padding:10px 8px}
 
-.prac-resource{margin-bottom:14px}
-.prac-res-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:background .1s;border-radius:var(--radius) var(--radius) 0 0}
-.prac-res-header:hover{background:var(--surface2)}
-.prac-res-expand{font-size:10px;color:var(--ink3);transition:transform .2s;flex-shrink:0}
-.prac-res-expand.open{transform:rotate(90deg)}
-.prac-res-name{flex:1;font-size:14px;font-weight:500}
-.prac-res-progress{font-size:11px;color:var(--ink3);white-space:nowrap}
-.prac-res-due{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap}
-.prac-res-due.upcoming{background:var(--blue-bg);color:var(--blue);border:0.5px solid var(--blue-border)}
-.prac-res-due.overdue{background:var(--red-bg);color:var(--red);border:0.5px solid var(--red-border)}
-.prac-res-due.none{display:none}
-.prac-res-actions{display:flex;gap:4px;opacity:0;transition:opacity .12s}
-.prac-res-header:hover .prac-res-actions{opacity:1}
-.prac-res-action-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;color:var(--ink3)}
-.prac-res-action-btn:hover{background:var(--surface2);color:var(--ink)}
-
-.prac-items{border-top:0.5px solid var(--border)}
-.prac-item{display:flex;align-items:center;gap:10px;padding:9px 16px 9px 38px;border-top:0.5px solid var(--border);transition:background .1s}
-.prac-item:first-child{border-top:none}
-.prac-item:hover{background:var(--surface2)}
-.prac-item-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-.prac-item-check:hover{border-color:var(--accent2)}
-.prac-item-check.done{background:var(--accent);border-color:var(--accent);color:#fff}
-.prac-item-check.done::after{content:'✓';font-size:11px;font-weight:600}
-.prac-item-name{flex:1;font-size:13px;color:var(--ink);transition:color .12s}
-.prac-item-name.done{text-decoration:line-through;color:var(--ink3)}
-.prac-item-due{font-size:10px;color:var(--ink3)}
-.prac-item-due.overdue{color:var(--red)}
-.prac-item-actions{display:flex;gap:2px;opacity:0;transition:opacity .12s}
-.prac-item:hover .prac-item-actions{opacity:1}
-
-.prac-add-item-row{padding:6px 16px 6px 38px;border-top:0.5px solid var(--border)}
-.prac-add-item-btn{background:none;border:none;font-family:inherit;font-size:12px;color:var(--ink3);cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:5px}
-.prac-add-item-btn:hover{color:var(--accent)}
-.prac-inline-add{display:flex;gap:8px;align-items:center;width:100%}
-.prac-inline-add input{flex:1;height:32px;font-size:12px}
-.prac-inline-add input[type=date]{width:130px;flex:none}
-
+/* ── Shared ── */
+.prac-action-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;color:var(--ink3)}
+.prac-action-btn:hover{background:var(--surface2);color:var(--ink)}
+.prac-prog-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;flex:1;min-width:40px;max-width:60px}
+.prac-prog-fill{height:100%;border-radius:3px;background:var(--accent2);transition:width .3s ease}
 .prac-empty{padding:40px 20px;text-align:center}
 .prac-empty-icon{font-size:36px;margin-bottom:10px}
 .prac-empty-text{font-size:14px;color:var(--ink2);margin-bottom:4px}
 .prac-empty-sub{font-size:12px;color:var(--ink3)}
+.prac-rename-input{font-family:inherit;font-size:inherit;border:1px solid var(--accent);border-radius:4px;padding:2px 6px;background:var(--surface);color:var(--ink);outline:none;width:100%;min-width:60px;box-sizing:border-box}
 
-.prac-prog-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;flex:1;min-width:50px}
-.prac-prog-fill{height:100%;border-radius:3px;background:var(--accent2);transition:width .3s ease}
+/* ── L1: Book ── */
+.prac-book{margin-bottom:14px}
+.pr-hdr{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;transition:background .1s}
+.pr-hdr:hover{background:var(--surface2)}
+.pr-exp{font-size:10px;color:var(--ink3);transition:transform .2s;flex-shrink:0}
+.pr-exp.open{transform:rotate(90deg)}
+.pr-icon{flex-shrink:0}
+.pr-name{flex:1;font-size:14px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:text}
+.pr-name.done{text-decoration:line-through;color:var(--ink3)}
+.pr-name:not(.done):hover{text-decoration:underline dotted var(--ink3);text-underline-offset:3px}
+.pr-count{font-size:11px;color:var(--ink3);white-space:nowrap}
+.pr-due{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.pr-due.upcoming{background:var(--blue-bg);color:var(--blue);border:0.5px solid var(--blue-border)}
+.pr-due.overdue{background:var(--red-bg);color:var(--red);border:0.5px solid var(--red-border)}
+.pr-actions{display:flex;gap:3px;opacity:0;transition:opacity .12s}
+.pr-hdr:hover .pr-actions{opacity:1}
 
-/* Mobile: always show action buttons since no hover */
-@media (max-width:768px) {
-  .prac-res-actions{opacity:1}
-  .prac-item-actions{opacity:1}
-  .prac-res-header{gap:6px;padding:10px 12px}
-  .prac-item{padding:9px 12px 9px 28px}
-  .prac-add-item-row{padding:6px 12px 6px 28px}
-  .prac-inline-add{flex-wrap:wrap}
-  .prac-inline-add input[type=date]{width:100%;flex:1}
+/* ── L2: Test ── */
+.pr-children{border-top:0.5px solid var(--border)}
+.pr-test{border-top:0.5px solid var(--border)}
+.pr-test:first-child{border-top:none}
+.pr-test-hdr{display:flex;align-items:center;gap:8px;padding:9px 16px 9px 28px;cursor:pointer;transition:background .1s}
+.pr-test-hdr:hover{background:var(--surface2)}
+.pr-test-name{flex:1;font-size:13px;font-weight:500;cursor:text}
+.pr-test-name.done{text-decoration:line-through;color:var(--ink3)}
+.pr-test-name:not(.done):hover{text-decoration:underline dotted var(--ink3);text-underline-offset:3px}
+.pr-test-hdr:hover .pr-actions{opacity:1}
+
+/* ── L3: Module ── */
+.pr-mod{border-top:0.5px solid var(--border)}
+.pr-mod:first-child{border-top:none}
+.pr-mod-hdr{display:flex;align-items:center;gap:7px;padding:8px 16px 8px 44px;cursor:pointer;transition:background .1s}
+.pr-mod-hdr:hover{background:var(--surface2)}
+.pr-mod-name{flex:1;font-size:12px;font-weight:500;cursor:text}
+.pr-mod-name.done{text-decoration:line-through;color:var(--ink3)}
+.pr-mod-name:not(.done):hover{text-decoration:underline dotted var(--ink3);text-underline-offset:3px}
+.pr-mod-hdr:hover .pr-actions{opacity:1}
+
+/* ── L4: Section (leaf) ── */
+.pr-sec{display:flex;align-items:center;gap:10px;padding:7px 16px 7px 62px;border-top:0.5px solid var(--border);transition:background .1s}
+.pr-sec:first-child{border-top:none}
+.pr-sec:hover{background:var(--surface2)}
+.pr-sec-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.pr-sec-check:hover{border-color:var(--accent2)}
+.pr-sec-check.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.pr-sec-check.done::after{content:'\2713';font-size:11px;font-weight:600}
+.pr-sec-name{flex:1;font-size:12px;color:var(--ink);cursor:text}
+.pr-sec-name.done{text-decoration:line-through;color:var(--ink3)}
+.pr-sec-name:not(.done):hover{text-decoration:underline dotted var(--ink3);text-underline-offset:3px}
+.pr-sec-due{font-size:10px;color:var(--ink3)}
+.pr-sec-due.overdue{color:var(--red)}
+.pr-sec:hover .pr-actions{opacity:1}
+
+/* ── Add rows ── */
+.pr-add{border-top:0.5px solid var(--border);font-size:12px;color:var(--ink3)}
+.pr-add-btn{background:none;border:none;font-family:inherit;font-size:12px;color:var(--ink3);cursor:pointer;padding:6px 0;display:flex;align-items:center;gap:5px}
+.pr-add-btn:hover{color:var(--accent)}
+.pr-add-l2{padding:6px 16px 6px 28px}
+.pr-add-l3{padding:6px 16px 6px 44px}
+.pr-add-l4{padding:6px 16px 6px 62px}
+
+/* ── Template preview ── */
+.prac-tpl-preview{background:var(--surface2);border-radius:var(--radius);padding:12px 14px;margin-top:10px;font-size:12px;color:var(--ink2);line-height:1.7;max-height:180px;overflow-y:auto}
+.prac-tpl-mod{font-weight:500;margin-top:4px}.prac-tpl-mod:first-child{margin-top:0}
+.prac-tpl-sec{padding-left:16px;color:var(--ink3)}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  .pr-actions{opacity:1}
+  .pr-hdr{gap:6px;padding:10px 12px}
+  .pr-test-hdr{padding:9px 12px 9px 22px}
+  .pr-mod-hdr{padding:8px 12px 8px 34px}
+  .pr-sec{padding:7px 12px 7px 48px}
+  .pr-add-l2{padding-left:22px}.pr-add-l3{padding-left:34px}.pr-add-l4{padding-left:48px}
 }
 </style>
 
@@ -76,552 +104,460 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">Practice</h1>
-      <div class="page-sub" id="prac-sub">Track your practice materials</div>
+      <div class="page-sub" id="prac-sub">Track your practice books &amp; tests</div>
     </div>
-    <button class="btn btn--primary btn--sm" onclick="openModal('modal-prac-resource')">+ Add resource</button>
+    <button class="btn btn--primary btn--sm" onclick="openModal('modal-prac-book')">+ Add book</button>
   </div>
-
-  <!-- Track filter tabs -->
   <div class="prac-track-tabs" id="prac-tabs"></div>
-
-  <!-- Summary cards -->
   <div class="prac-summary-row" id="prac-summary"></div>
-
-  <!-- Resource list -->
-  <div id="prac-list">
-    <div style="padding:20px;font-size:13px;color:var(--ink3)">Loading…</div>
-  </div>
+  <div id="prac-list"><div style="padding:20px;font-size:13px;color:var(--ink3)">Loading\u2026</div></div>
 </div>
 
-<!-- ═══ Modal: Add Resource ═══ -->
-<div class="modal-backdrop" id="modal-prac-resource">
+<!-- ═══ Modal: Add Book ═══ -->
+<div class="modal-backdrop" id="modal-prac-book">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="prac-res-modal-title">Add practice resource</div>
-    <input type="hidden" id="prac-res-edit-id" value="">
-    <div class="field">
-      <label class="fl">Name</label>
-      <input type="text" id="prac-res-name" placeholder="e.g. Cambridge IELTS Book 8">
-    </div>
-    <div class="field">
-      <label class="fl">Track</label>
-      <select id="prac-res-track">
-        <option value="">- select -</option>
-      </select>
-    </div>
-    <div class="field">
-      <label class="fl">Due date (optional)</label>
-      <input type="date" id="prac-res-due">
-    </div>
-    <div class="field">
-      <label class="fl">Notes (optional)</label>
-      <textarea id="prac-res-notes" placeholder="e.g. Focus on academic reading passages"></textarea>
-    </div>
+    <div class="modal-title" id="prac-book-modal-title">Add practice book</div>
+    <input type="hidden" id="prac-book-edit-id" value="">
+    <div class="field"><label class="fl">Name</label>
+      <input type="text" id="prac-book-name" placeholder="e.g. Cambridge IELTS Book 8"></div>
+    <div class="field"><label class="fl">Track</label>
+      <select id="prac-book-track"><option value="">- select -</option></select></div>
+    <div class="field" id="prac-tpl-field"><label class="fl">Structure template</label>
+      <select id="prac-book-template" onchange="pracPreviewTemplate()"><option value="">- none (add manually) -</option></select>
+      <div id="prac-tpl-preview"></div></div>
+    <div class="field" id="prac-test-count-field" style="display:none"><label class="fl">Number of tests</label>
+      <input type="number" id="prac-book-test-count" min="1" max="20" value="4"></div>
+    <div class="field"><label class="fl">Due date (optional)</label>
+      <input type="date" id="prac-book-due"></div>
+    <div class="field"><label class="fl">Notes (optional)</label>
+      <textarea id="prac-book-notes" placeholder="e.g. Focus on academic passages"></textarea></div>
     <div class="modal-footer">
       <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
-      <button class="btn btn--primary" style="flex:1" id="prac-res-save-btn" onclick="pracSaveResource()">Add resource</button>
+      <button class="btn btn--primary" style="flex:1" id="prac-book-save-btn" onclick="pracSaveBook()">Add book</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ Modal: Add Items (batch) ═══ -->
-<div class="modal-backdrop" id="modal-prac-items">
+<!-- ═══ Modal: Add child (test / module / section) ═══ -->
+<div class="modal-backdrop" id="modal-prac-add-child">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Add practice items</div>
-    <div style="font-size:12px;color:var(--ink3);margin-bottom:14px" id="prac-items-parent-lbl">to: —</div>
-    <div class="field">
-      <label class="fl">Items (one per line)</label>
-      <textarea id="prac-items-text" style="height:140px" placeholder="Reading Passage 1&#10;Reading Passage 2&#10;Reading Passage 3&#10;Writing Task 1"></textarea>
-    </div>
-    <div class="field">
-      <label class="fl">Default due date (optional, applies to all)</label>
-      <input type="date" id="prac-items-due">
-    </div>
+    <div class="modal-title" id="prac-child-title">Add</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:14px" id="prac-child-parent-lbl">to: —</div>
+    <input type="hidden" id="prac-child-parent-id" value="">
+    <input type="hidden" id="prac-child-type" value="">
+    <div class="field"><label class="fl" id="prac-child-name-lbl">Name</label>
+      <input type="text" id="prac-child-name" placeholder=""></div>
     <div class="modal-footer">
       <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
-      <button class="btn btn--primary" style="flex:1" onclick="pracSaveItemsBatch()">Add items</button>
+      <button class="btn btn--primary" style="flex:1" onclick="pracSaveChild()">Add</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ Modal: Edit Item ═══ -->
-<div class="modal-backdrop" id="modal-prac-edit-item">
+<!-- ═══ Modal: Add Sections (batch) ═══ -->
+<div class="modal-backdrop" id="modal-prac-sections">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Edit item</div>
-    <input type="hidden" id="prac-edit-item-id" value="">
-    <div class="field">
-      <label class="fl">Name</label>
-      <input type="text" id="prac-edit-item-name">
-    </div>
-    <div class="field">
-      <label class="fl">Due date</label>
-      <input type="date" id="prac-edit-item-due">
-    </div>
-    <div class="field">
-      <label class="fl">Notes</label>
-      <textarea id="prac-edit-item-notes"></textarea>
-    </div>
+    <div class="modal-title">Add sections</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:14px" id="prac-sec-parent-lbl">to: —</div>
+    <input type="hidden" id="prac-sec-parent-id" value="">
+    <div class="field"><label class="fl">Sections (one per line)</label>
+      <textarea id="prac-sec-names" style="height:140px" placeholder="Passage 1&#10;Passage 2&#10;Passage 3"></textarea></div>
+    <div class="field"><label class="fl">Due date (optional)</label>
+      <input type="date" id="prac-sec-due"></div>
     <div class="modal-footer">
-      <button class="btn btn--danger btn--sm" onclick="pracDeleteItem()" style="margin-right:auto">Delete</button>
       <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
-      <button class="btn btn--primary" style="flex:1" onclick="pracSaveItemEdit()">Save</button>
+      <button class="btn btn--primary" style="flex:1" onclick="pracSaveSectionsBatch()">Add sections</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Edit entry ═══ -->
+<div class="modal-backdrop" id="modal-prac-edit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="prac-edit-title">Edit</div>
+    <input type="hidden" id="prac-edit-id" value="">
+    <input type="hidden" id="prac-edit-type" value="">
+    <div class="field"><label class="fl">Name</label><input type="text" id="prac-edit-name"></div>
+    <div class="field"><label class="fl">Due date</label><input type="date" id="prac-edit-due"></div>
+    <div class="field"><label class="fl">Notes</label><textarea id="prac-edit-notes"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn--danger btn--sm" onclick="pracDeleteEntry()" style="margin-right:auto">Delete</button>
+      <button class="btn btn--ghost" onclick="closeModals()">Cancel</button>
+      <button class="btn btn--primary" style="flex:1" onclick="pracSaveEdit()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── Practice page state ───────────────────────────────────────────────────────
-var _pracData     = [];
-var _pracTrack    = 'All';
-var _pracSummary  = {};
-var _pracLoaded   = false;
-var _pracExpanded = {};     // { resourceId: true/false }
-var _pracBatchParent = '';  // for batch add modal
-
-// ── Track list from constants ─────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────────────────────────
+var _pracData=[], _pracTrack='All', _pracSummary={}, _pracLoaded=false;
+var _pracExp={}; // id → bool (expand/collapse for any level)
+var _pracTemplates=[], _pracTplCache={};
 var PRAC_TRACKS = ['All'].concat(window.APP_TRACKS || []);
 
 // ── Load ──────────────────────────────────────────────────────────────────────
 async function pracLoad() {
   if (_pracLoaded) { pracRender(); return; }
-
-  // Populate track selector in modal
-  var sel = document.getElementById('prac-res-track');
-  if (sel && sel.options.length <= 1) {
-    (window.APP_TRACKS || []).forEach(function(t) {
-      var o = document.createElement('option');
-      o.value = t; o.textContent = t;
-      sel.appendChild(o);
-    });
-  }
-
+  _populateSelect('prac-book-track', window.APP_TRACKS || []);
   document.getElementById('prac-list').innerHTML =
-    '<div style="padding:20px;font-size:13px;color:var(--ink3)">Loading practice data…</div>';
-
+    '<div style="padding:20px;font-size:13px;color:var(--ink3)">Loading practice data\u2026</div>';
   try {
-    var results = await Promise.all([
-      api.call('getAllPracticeData'),
-      api.call('getPracticeSummary')
+    var r = await Promise.all([
+      api.call('getAllPracticeData'), api.call('getPracticeSummary'), api.call('getPracticeTemplates')
     ]);
-    _pracData    = Array.isArray(results[0]) ? results[0] : [];
-    _pracSummary = results[1] || { tracks: {}, total: { entered: 0, completed: 0 } };
-    _pracLoaded  = true;
-    _pracRenderTabs();
-    pracRender();
-  } catch (e) {
+    _pracData = Array.isArray(r[0]) ? r[0] : [];
+    _pracSummary = r[1] || {tracks:{},total:{entered:0,completed:0}};
+    _pracTemplates = Array.isArray(r[2]) ? r[2] : [];
+    _populateSelect('prac-book-template', _pracTemplates, true);
+    _pracLoaded = true;
+    _pracRenderTabs(); pracRender();
+  } catch(e) {
     document.getElementById('prac-list').innerHTML =
-      '<div style="padding:20px;font-size:13px;color:var(--red2)">Error: ' + escHtml(e.message) + '</div>';
+      '<div style="padding:20px;font-size:13px;color:var(--red2)">Error: '+escHtml(e.message)+'</div>';
   }
 }
 
-// ── Tab rendering ─────────────────────────────────────────────────────────────
+function _populateSelect(selId, items, keepFirst) {
+  var sel = document.getElementById(selId);
+  if (!sel) return;
+  var start = keepFirst ? 1 : 1;
+  if (sel.options.length > start) return;
+  items.forEach(function(t) { var o=document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); });
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
 function _pracRenderTabs() {
-  var el = document.getElementById('prac-tabs');
+  var el=document.getElementById('prac-tabs');
   el.innerHTML = PRAC_TRACKS.map(function(t) {
-    var count = '';
-    if (t === 'All') {
-      count = _pracData.length;
-    } else {
-      count = _pracData.filter(function(r) { return r.track === t; }).length;
-    }
-    var countHtml = count > 0 ? '<span class="prac-ttab-count">(' + count + ')</span>' : '';
-    return '<button class="prac-ttab' + (t === _pracTrack ? ' active' : '') +
-           '" onclick="pracSwitchTrack(\'' + escHtml(t) + '\')">' + escHtml(t) + countHtml + '</button>';
+    var c = t==='All' ? _pracData.length : _pracData.filter(function(b){return b.track===t;}).length;
+    var ch = c>0 ? '<span class="prac-ttab-count">('+c+')</span>' : '';
+    return '<button class="prac-ttab'+(t===_pracTrack?' active':'')+'" onclick="pracSwitchTrack(\''+escHtml(t)+'\')">'+escHtml(t)+ch+'</button>';
   }).join('');
 }
+function pracSwitchTrack(t) { _pracTrack=t; _pracRenderTabs(); pracRender(); }
 
-function pracSwitchTrack(track) {
-  _pracTrack = track;
-  _pracRenderTabs();
-  pracRender();
-}
-
-// ── Main render ───────────────────────────────────────────────────────────────
-function pracRender() {
-  _pracRenderSummary();
-  _pracRenderList();
-}
+// ── Render ────────────────────────────────────────────────────────────────────
+function pracRender() { _pracRenderSummary(); _pracRenderList(); }
 
 function _pracRenderSummary() {
-  var el = document.getElementById('prac-summary');
-  var tracks = _pracSummary.tracks || {};
-  var total  = _pracSummary.total || { entered: 0, completed: 0 };
-
-  if (_pracTrack === 'All') {
-    // Show per-track breakdown
-    var trackKeys = Object.keys(tracks);
-    if (trackKeys.length === 0) {
-      el.innerHTML = '';
-      return;
-    }
-    el.innerHTML = trackKeys.map(function(t) {
-      var d = tracks[t];
-      var pct = d.entered > 0 ? Math.round(d.completed / d.entered * 100) : 0;
-      return '<div class="sb prac-summary-card">' +
-        '<div class="sb-lbl">' + escHtml(t) + '</div>' +
-        '<div style="font-size:18px;font-weight:500;margin-top:4px">' + d.completed + '/' + d.entered + '</div>' +
-        '<div class="prac-prog-bar" style="margin-top:6px"><div class="prac-prog-fill" style="width:' + pct + '%"></div></div>' +
-        '</div>';
+  var el=document.getElementById('prac-summary'), tracks=_pracSummary.tracks||{};
+  if (_pracTrack==='All') {
+    var keys=Object.keys(tracks);
+    if (!keys.length) { el.innerHTML=''; return; }
+    el.innerHTML = keys.map(function(t) {
+      var d=tracks[t], pct=d.entered>0?Math.round(d.completed/d.entered*100):0;
+      return '<div class="sb prac-summary-card"><div class="sb-lbl">'+escHtml(t)+'</div>' +
+        '<div style="font-size:18px;font-weight:500;margin-top:4px">'+d.completed+'/'+d.entered+'</div>' +
+        '<div class="prac-prog-bar" style="margin-top:6px;max-width:none"><div class="prac-prog-fill" style="width:'+pct+'%"></div></div></div>';
     }).join('');
   } else {
-    var d = tracks[_pracTrack] || { entered: 0, completed: 0 };
-    var pct = d.entered > 0 ? Math.round(d.completed / d.entered * 100) : 0;
-    el.innerHTML =
-      '<div class="sb prac-summary-card" style="max-width:200px">' +
-      '<div class="sb-lbl">' + escHtml(_pracTrack) + '</div>' +
-      '<div style="font-size:22px;font-weight:500;margin-top:4px">' + d.completed + ' / ' + d.entered + '</div>' +
-      '<div class="prac-prog-bar" style="margin-top:6px"><div class="prac-prog-fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="sb-unit">' + pct + '% complete</div>' +
-      '</div>';
+    var d=tracks[_pracTrack]||{entered:0,completed:0}, pct=d.entered>0?Math.round(d.completed/d.entered*100):0;
+    el.innerHTML = '<div class="sb prac-summary-card" style="max-width:200px"><div class="sb-lbl">'+escHtml(_pracTrack)+'</div>' +
+      '<div style="font-size:22px;font-weight:500;margin-top:4px">'+d.completed+' / '+d.entered+'</div>' +
+      '<div class="prac-prog-bar" style="margin-top:6px;max-width:none"><div class="prac-prog-fill" style="width:'+pct+'%"></div></div>' +
+      '<div class="sb-unit">'+pct+'% complete</div></div>';
   }
 }
 
 function _pracRenderList() {
-  var el   = document.getElementById('prac-list');
-  var data = _pracTrack === 'All'
-    ? _pracData
-    : _pracData.filter(function(r) { return r.track === _pracTrack; });
-
-  if (data.length === 0) {
-    el.innerHTML =
-      '<div class="prac-empty">' +
-      '<div class="prac-empty-icon">📋</div>' +
-      '<div class="prac-empty-text">No practice resources yet</div>' +
-      '<div class="prac-empty-sub">Add a book, test, or worksheet to start tracking</div>' +
-      '</div>';
+  var el=document.getElementById('prac-list');
+  var data = _pracTrack==='All' ? _pracData : _pracData.filter(function(b){return b.track===_pracTrack;});
+  if (!data.length) {
+    el.innerHTML = '<div class="prac-empty"><div class="prac-empty-icon">\uD83D\uDCDA</div>' +
+      '<div class="prac-empty-text">No practice books yet</div>' +
+      '<div class="prac-empty-sub">Add a book to start tracking</div></div>';
     return;
   }
+  el.innerHTML = data.map(_renderBook_).join('');
+}
 
-  el.innerHTML = data.map(function(res) {
-    var items      = res.items || [];
-    var doneCount  = items.filter(function(it) { return it.status === 'done'; }).length;
-    var totalCount = items.length;
-    var isExpanded = _pracExpanded[res.id] !== false; // default open
-    var pct        = totalCount > 0 ? Math.round(doneCount / totalCount * 100) : 0;
-    var dueClass   = _pracDueClass(res.dueDate);
+// ── L1: Book ──────────────────────────────────────────────────────────────────
+function _renderBook_(bk) {
+  var ex=_pracExp[bk.id]!==false, dn=bk.status==='done';
+  var tot=bk.totalSections||0, done=bk.doneSections||0, pct=tot>0?Math.round(done/tot*100):0;
+  var h='<div class="card prac-book" style="padding:0;overflow:hidden">';
+  h+='<div class="pr-hdr" onclick="pracToggle(\''+bk.id+'\')">';
+  h+='<span class="pr-exp'+(ex?' open':'')+'">\u25B6</span>';
+  h+='<span class="pr-icon">'+(dn?'\u2705':'\uD83D\uDCD6')+'</span>';
+  h+='<span class="pr-name'+(dn?' done':'')+'" onclick="pracRename(\''+bk.id+'\',this,event)">'+escHtml(bk.name)+'</span>';
+  h+='<span class="pr-count">'+done+'/'+tot+'</span>';
+  h+='<div class="prac-prog-bar"><div class="prac-prog-fill" style="width:'+pct+'%"></div></div>';
+  if(bk.dueDate) h+='<span class="pr-due '+_dueClass(bk.dueDate)+'">'+_dueLabel(bk.dueDate)+'</span>';
+  h+='<span class="pr-actions">';
+  h+='<button class="prac-action-btn" onclick="event.stopPropagation();pracAddChild(\''+bk.id+'\',\''+_esc(bk.name)+'\',\'test\',\'Add test\')" title="Add test">+</button>';
+  h+='<button class="prac-action-btn" onclick="event.stopPropagation();pracOpenEdit(\''+bk.id+'\',\'book\')" title="Edit">\u270E</button>';
+  h+='</span></div>';
+  if(ex) {
+    h+='<div class="pr-children">';
+    var tests=bk.tests||[];
+    if(tests.length) { tests.forEach(function(t){h+=_renderTest_(t);}); }
+    else { h+='<div style="padding:12px 28px;font-size:12px;color:var(--ink3)">No tests yet</div>'; }
+    h+='<div class="pr-add pr-add-l2"><button class="pr-add-btn" onclick="pracAddChild(\''+bk.id+'\',\''+_esc(bk.name)+'\',\'test\',\'Add test\')">+ Add test</button></div>';
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
 
-    var html = '<div class="card prac-resource" style="padding:0;overflow:hidden">';
+// ── L2: Test ──────────────────────────────────────────────────────────────────
+function _renderTest_(ts) {
+  var ex=_pracExp[ts.id]!==false, dn=ts.status==='done';
+  var tot=ts.totalSections||0, done=ts.doneSections||0, pct=tot>0?Math.round(done/tot*100):0;
+  var h='<div class="pr-test">';
+  h+='<div class="pr-test-hdr" onclick="pracToggle(\''+ts.id+'\')">';
+  h+='<span class="pr-exp'+(ex?' open':'')+'" style="font-size:9px">\u25B6</span>';
+  h+='<span class="pr-icon" style="font-size:13px">'+(dn?'\u2705':'\uD83D\uDCDD')+'</span>';
+  h+='<span class="pr-test-name'+(dn?' done':'')+'" onclick="pracRename(\''+ts.id+'\',this,event)">'+escHtml(ts.name)+'</span>';
+  h+='<span class="pr-count" style="font-size:10px">'+done+'/'+tot+'</span>';
+  h+='<div class="prac-prog-bar" style="max-width:50px"><div class="prac-prog-fill" style="width:'+pct+'%"></div></div>';
+  h+='<span class="pr-actions">';
+  h+='<button class="prac-action-btn" onclick="event.stopPropagation();pracAddChild(\''+ts.id+'\',\''+_esc(ts.name)+'\',\'module\',\'Add module\')" title="Add module">+</button>';
+  h+='<button class="prac-action-btn" onclick="event.stopPropagation();pracOpenEdit(\''+ts.id+'\',\'test\')" title="Edit">\u270E</button>';
+  h+='</span></div>';
+  if(ex) {
+    var mods=ts.modules||[];
+    if(mods.length) { mods.forEach(function(m){h+=_renderMod_(m);}); }
+    else { h+='<div style="padding:10px 44px;font-size:12px;color:var(--ink3)">No modules yet</div>'; }
+    h+='<div class="pr-add pr-add-l3"><button class="pr-add-btn" onclick="pracAddChild(\''+ts.id+'\',\''+_esc(ts.name)+'\',\'module\',\'Add module\')">+ Add module</button></div>';
+  }
+  h+='</div>';
+  return h;
+}
 
-    // Resource header
-    html += '<div class="prac-res-header" onclick="pracToggleExpand(\'' + res.id + '\')">';
-    html += '<span class="prac-res-expand' + (isExpanded ? ' open' : '') + '">▶</span>';
-    html += '<span class="prac-res-name">' + escHtml(res.name) + '</span>';
-    if (res.dueDate) {
-      html += '<span class="prac-res-due ' + dueClass + '">' + _pracFmtDue(res.dueDate) + '</span>';
-    }
-    if (totalCount > 0) {
-      html += '<span class="prac-res-progress">' + doneCount + '/' + totalCount + '</span>';
-      html += '<div class="prac-prog-bar" style="width:60px"><div class="prac-prog-fill" style="width:' + pct + '%"></div></div>';
-    }
-    html += '<div class="prac-res-actions" onclick="event.stopPropagation()">';
-    html += '<button class="prac-res-action-btn" title="Add items" onclick="pracOpenBatchAdd(\'' + res.id + '\',\'' + escHtml(res.name).replace(/'/g, "\\'") + '\')">＋</button>';
-    html += '<button class="prac-res-action-btn" title="Edit" onclick="pracEditResource(\'' + res.id + '\')">✎</button>';
-    html += '<button class="prac-res-action-btn" title="Delete" onclick="pracDeleteResource(\'' + res.id + '\',\'' + escHtml(res.name).replace(/'/g, "\\'") + '\')">🗑</button>';
-    html += '</div>';
-    html += '</div>';
+// ── L3: Module ────────────────────────────────────────────────────────────────
+function _renderMod_(md) {
+  var ex=_pracExp[md.id]!==false, dn=md.status==='done';
+  var tot=md.totalSections||0, done=md.doneSections||0, pct=tot>0?Math.round(done/tot*100):0;
+  var h='<div class="pr-mod">';
+  h+='<div class="pr-mod-hdr" onclick="pracToggle(\''+md.id+'\')">';
+  h+='<span class="pr-exp'+(ex?' open':'')+'" style="font-size:8px">\u25B6</span>';
+  h+='<span class="pr-icon" style="font-size:12px">'+_modIcon(md.name,dn)+'</span>';
+  h+='<span class="pr-mod-name'+(dn?' done':'')+'" onclick="pracRename(\''+md.id+'\',this,event)">'+escHtml(md.name)+'</span>';
+  h+='<span class="pr-count" style="font-size:10px">'+done+'/'+tot+'</span>';
+  h+='<div class="prac-prog-bar" style="max-width:40px"><div class="prac-prog-fill" style="width:'+pct+'%"></div></div>';
+  h+='<span class="pr-actions">';
+  h+='<button class="prac-action-btn" onclick="event.stopPropagation();pracOpenAddSections(\''+md.id+'\',\''+_esc(md.name)+'\')" title="Add sections">+</button>';
+  h+='<button class="prac-action-btn" onclick="event.stopPropagation();pracOpenEdit(\''+md.id+'\',\'module\')" title="Edit">\u270E</button>';
+  h+='</span></div>';
+  if(ex) {
+    var secs=md.sections||[];
+    if(secs.length) { secs.forEach(function(s){h+=_renderSec_(s);}); }
+    else { h+='<div style="padding:8px 62px;font-size:12px;color:var(--ink3)">No sections yet</div>'; }
+    h+='<div class="pr-add pr-add-l4"><button class="pr-add-btn" onclick="pracOpenAddSections(\''+md.id+'\',\''+_esc(md.name)+'\')">+ Add section</button></div>';
+  }
+  h+='</div>';
+  return h;
+}
 
-    // Items (collapsible)
-    if (isExpanded) {
-      html += '<div class="prac-items">';
-      items.forEach(function(it) {
-        var isDone = it.status === 'done';
-        var itemDueClass = _pracDueClass(it.dueDate);
-        html += '<div class="prac-item">';
-        html += '<div class="prac-item-check' + (isDone ? ' done' : '') + '" onclick="pracToggleItem(\'' + it.id + '\')"></div>';
-        html += '<span class="prac-item-name' + (isDone ? ' done' : '') + '">' + escHtml(it.name) + '</span>';
-        if (it.dueDate && !isDone) {
-          html += '<span class="prac-item-due ' + itemDueClass + '">' + _pracFmtDue(it.dueDate) + '</span>';
-        }
-        if (isDone && it.completedDate) {
-          html += '<span class="prac-item-due">done ' + _pracFmtDue(it.completedDate) + '</span>';
-        }
-        html += '<div class="prac-item-actions">';
-        html += '<button class="prac-res-action-btn" title="Edit" onclick="pracOpenEditItem(\'' + it.id + '\')">✎</button>';
-        html += '</div>';
-        html += '</div>';
-      });
-      // Inline add row
-      html += '<div class="prac-add-item-row">';
-      html += '<button class="prac-add-item-btn" onclick="pracStartInlineAdd(this,\'' + res.id + '\')">';
-      html += '<span>+</span> Add item</button>';
-      html += '</div>';
-      html += '</div>';
-    }
-
-    html += '</div>';
-    return html;
-  }).join('');
+// ── L4: Section ───────────────────────────────────────────────────────────────
+function _renderSec_(sc) {
+  var dn=sc.status==='done', dl=sc.dueDate?_dueLabel(sc.dueDate):'';
+  var h='<div class="pr-sec">';
+  h+='<div class="pr-sec-check'+(dn?' done':'')+'" onclick="pracToggleSection(\''+sc.id+'\')"></div>';
+  h+='<span class="pr-sec-name'+(dn?' done':'')+'" onclick="pracRename(\''+sc.id+'\',this,event)">'+escHtml(sc.name)+'</span>';
+  if(dl) h+='<span class="pr-sec-due '+_dueClass(sc.dueDate)+'">'+dl+'</span>';
+  h+='<span class="pr-actions">';
+  h+='<button class="prac-action-btn" onclick="pracOpenEdit(\''+sc.id+'\',\'section\')" title="Edit">\u270E</button>';
+  h+='</span></div>';
+  return h;
 }
 
 // ── Expand/collapse ───────────────────────────────────────────────────────────
-function pracToggleExpand(resId) {
-  _pracExpanded[resId] = _pracExpanded[resId] === false ? true : false;
-  _pracRenderList();
+function pracToggle(id) { _pracExp[id]=_pracExp[id]===false?true:false; _pracRenderList(); }
+
+// ── Toggle section ────────────────────────────────────────────────────────────
+async function pracToggleSection(id) {
+  try {
+    var res = await api.call('togglePracticeSectionStatus',id);
+    if(res.error){showToast(res.error);return;}
+    _pracLoaded=false; await pracLoad();
+    showToast(res.newStatus==='done'?'Done!':'Unmarked');
+  } catch(e) { showToast('Error: '+e.message); }
 }
 
-// ── Toggle item done/pending ──────────────────────────────────────────────────
-async function pracToggleItem(itemId) {
-  // Optimistic UI update
-  _pracData.forEach(function(res) {
-    (res.items || []).forEach(function(it) {
-      if (it.id === itemId) {
-        it.status = it.status === 'done' ? 'pending' : 'done';
-        it.completedDate = it.status === 'done' ? new Date().toISOString().split('T')[0] : '';
+// ── Inline rename ─────────────────────────────────────────────────────────────
+function pracRename(id,el,e) {
+  e.stopPropagation();
+  if(el.querySelector('input')) return;
+  var orig=el.textContent;
+  var inp=document.createElement('input');
+  inp.type='text'; inp.className='prac-rename-input'; inp.value=orig;
+  el.textContent=''; el.appendChild(inp); inp.focus(); inp.select();
+  inp.addEventListener('keydown',function(ev){
+    if(ev.key==='Enter'){ev.preventDefault();_finishRename(id,inp,orig);}
+    else if(ev.key==='Escape'){ev.preventDefault();el.textContent=orig;}
+  });
+  inp.addEventListener('blur',function(){
+    setTimeout(function(){if(document.body.contains(inp))_finishRename(id,inp,orig);},100);
+  });
+}
+async function _finishRename(id,inp,orig) {
+  var v=(inp.value||'').trim(), p=inp.parentElement;
+  if(!v||v===orig){p.textContent=orig;return;}
+  p.textContent=v;
+  try {
+    var r=await api.call('updatePracticeEntry',id,{name:v});
+    if(r.error){showToast(r.error);p.textContent=orig;return;}
+    var entry=_pracFind(id); if(entry)entry.name=v;
+    showToast('Renamed');
+  } catch(e){showToast('Error: '+e.message);p.textContent=orig;}
+}
+
+// ── Add Book ──────────────────────────────────────────────────────────────────
+async function pracSaveBook() {
+  var name=document.getElementById('prac-book-name').value.trim();
+  var track=document.getElementById('prac-book-track').value;
+  var tpl=document.getElementById('prac-book-template').value;
+  var tc=parseInt(document.getElementById('prac-book-test-count').value)||0;
+  var due=document.getElementById('prac-book-due').value;
+  var notes=document.getElementById('prac-book-notes').value;
+  if(!name){showToast('Name is required');return;}
+  if(!track){showToast('Track is required');return;}
+  try {
+    var res=await api.call('addPracticeBook',{name:name,track:track,templateName:tpl,testCount:tc,dueDate:due,notes:notes});
+    if(res.error){showToast(res.error);return;}
+    closeModals(); _pracLoaded=false; await pracLoad();
+    showToast('Book added'+(tc>0?' with '+tc+' tests':''));
+  } catch(e){showToast('Error: '+e.message);}
+}
+
+function pracPreviewTemplate() {
+  var tpl=document.getElementById('prac-book-template').value;
+  var el=document.getElementById('prac-tpl-preview');
+  var tcf=document.getElementById('prac-test-count-field');
+  if(!tpl||tpl==='Custom'){el.innerHTML='';tcf.style.display='none';return;}
+  tcf.style.display='';
+  if(_pracTplCache[tpl]){_renderTplPreview(el,_pracTplCache[tpl]);return;}
+  api.call('getPracticeTemplateStructure',tpl).then(function(s){
+    if(s){_pracTplCache[tpl]=s;_renderTplPreview(el,s);}
+  });
+}
+function _renderTplPreview(el,s) {
+  var tc=parseInt(document.getElementById('prac-book-test-count').value)||4;
+  var h='<div class="prac-tpl-preview"><div style="font-size:11px;color:var(--ink3);margin-bottom:6px">Each test will contain:</div>';
+  Object.keys(s).forEach(function(m){
+    h+='<div class="prac-tpl-mod">'+_modIcon(m,false)+' '+escHtml(m)+'</div>';
+    (s[m]||[]).forEach(function(sc){h+='<div class="prac-tpl-sec">\u2022 '+escHtml(sc)+'</div>';});
+  });
+  var secCount=0; Object.keys(s).forEach(function(m){secCount+=(s[m]||[]).length;});
+  h+='<div style="margin-top:8px;font-size:11px;color:var(--ink3)">\u2192 '+tc+' tests \u00D7 '+secCount+' sections = '+(tc*secCount)+' checkable items</div>';
+  h+='</div>'; el.innerHTML=h;
+}
+
+// ── Add child (test / module) ─────────────────────────────────────────────────
+function pracAddChild(parentId, parentName, childType, title) {
+  document.getElementById('prac-child-parent-id').value=parentId;
+  document.getElementById('prac-child-type').value=childType;
+  document.getElementById('prac-child-title').textContent=title;
+  document.getElementById('prac-child-parent-lbl').textContent='to: '+parentName;
+  document.getElementById('prac-child-name').value='';
+  var lbl=childType==='test'?'Test name (e.g. Test 1)':'Module name (e.g. Listening)';
+  document.getElementById('prac-child-name').placeholder=lbl;
+  document.getElementById('prac-child-name-lbl').textContent=childType==='test'?'Test name':'Module name';
+  openModal('modal-prac-add-child');
+}
+async function pracSaveChild() {
+  var parentId=document.getElementById('prac-child-parent-id').value;
+  var childType=document.getElementById('prac-child-type').value;
+  var name=document.getElementById('prac-child-name').value.trim();
+  if(!name){showToast('Name is required');return;}
+  try {
+    var fn=childType==='test'?'addPracticeTest':'addPracticeModule';
+    var res=await api.call(fn,{parentId:parentId,name:name});
+    if(res.error){showToast(res.error);return;}
+    closeModals(); _pracLoaded=false; await pracLoad();
+    showToast((childType==='test'?'Test':'Module')+' added');
+  } catch(e){showToast('Error: '+e.message);}
+}
+
+// ── Add Sections (batch) ──────────────────────────────────────────────────────
+function pracOpenAddSections(moduleId, moduleName) {
+  document.getElementById('prac-sec-parent-id').value=moduleId;
+  document.getElementById('prac-sec-parent-lbl').textContent='to: '+moduleName;
+  document.getElementById('prac-sec-names').value='';
+  document.getElementById('prac-sec-due').value='';
+  openModal('modal-prac-sections');
+}
+async function pracSaveSectionsBatch() {
+  var pid=document.getElementById('prac-sec-parent-id').value;
+  var text=document.getElementById('prac-sec-names').value;
+  var due=document.getElementById('prac-sec-due').value;
+  var names=text.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  if(!names.length){showToast('Enter at least one section name');return;}
+  try {
+    var res=await api.call('addPracticeSectionsBatch',{parentId:pid,names:names,dueDate:due});
+    if(res.error){showToast(res.error);return;}
+    closeModals(); _pracLoaded=false; await pracLoad();
+    showToast(res.count+' section(s) added');
+  } catch(e){showToast('Error: '+e.message);}
+}
+
+// ── Edit / Delete ─────────────────────────────────────────────────────────────
+function pracOpenEdit(id,type) {
+  var e=_pracFind(id); if(!e){showToast('Not found');return;}
+  document.getElementById('prac-edit-title').textContent='Edit '+type;
+  document.getElementById('prac-edit-id').value=id;
+  document.getElementById('prac-edit-type').value=type;
+  document.getElementById('prac-edit-name').value=e.name||'';
+  document.getElementById('prac-edit-due').value=e.dueDate||'';
+  document.getElementById('prac-edit-notes').value=e.notes||'';
+  openModal('modal-prac-edit');
+}
+async function pracSaveEdit() {
+  var id=document.getElementById('prac-edit-id').value;
+  var name=document.getElementById('prac-edit-name').value.trim();
+  if(!name){showToast('Name is required');return;}
+  try {
+    var res=await api.call('updatePracticeEntry',id,{
+      name:name, dueDate:document.getElementById('prac-edit-due').value,
+      notes:document.getElementById('prac-edit-notes').value});
+    if(res.error){showToast(res.error);return;}
+    closeModals(); _pracLoaded=false; await pracLoad(); showToast('Updated');
+  } catch(e){showToast('Error: '+e.message);}
+}
+async function pracDeleteEntry() {
+  var type=document.getElementById('prac-edit-type').value;
+  var warn={book:'Delete this book and ALL its tests, modules, and sections?',
+    test:'Delete this test and all its modules/sections?',
+    module:'Delete this module and all its sections?',section:'Delete this section?'};
+  if(!confirm(warn[type]||'Delete?'))return;
+  try {
+    var res=await api.call('deletePracticeEntry',document.getElementById('prac-edit-id').value);
+    if(res.error){showToast(res.error);return;}
+    closeModals(); _pracLoaded=false; await pracLoad(); showToast('Deleted');
+  } catch(e){showToast('Error: '+e.message);}
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function _pracFind(id) {
+  for(var i=0;i<_pracData.length;i++){
+    var bk=_pracData[i]; if(bk.id===id)return bk;
+    for(var j=0;j<(bk.tests||[]).length;j++){
+      var ts=bk.tests[j]; if(ts.id===id)return ts;
+      for(var k=0;k<(ts.modules||[]).length;k++){
+        var md=ts.modules[k]; if(md.id===id)return md;
+        for(var l=0;l<(md.sections||[]).length;l++){
+          if(md.sections[l].id===id)return md.sections[l];
+        }
       }
-    });
-    // Recompute resource status
-    var items = res.items || [];
-    var allDone = items.length > 0 && items.every(function(it) { return it.status === 'done'; });
-    res.status = allDone ? 'done' : 'pending';
-  });
-  // Update summary optimistically
-  _pracRecomputeSummary();
-  pracRender();
-
-  try {
-    await api.call('togglePracticeItemStatus', itemId);
-  } catch (e) {
-    showToast('Error: ' + e.message);
-    _pracLoaded = false;
-    pracLoad(); // reload from server
-  }
-}
-
-function _pracRecomputeSummary() {
-  var tracks = {};
-  var totalE = 0, totalC = 0;
-  _pracData.forEach(function(res) {
-    (res.items || []).forEach(function(it) {
-      if (!tracks[it.track]) tracks[it.track] = { entered: 0, completed: 0 };
-      tracks[it.track].entered++;
-      totalE++;
-      if (it.status === 'done') { tracks[it.track].completed++; totalC++; }
-    });
-  });
-  _pracSummary = { tracks: tracks, total: { entered: totalE, completed: totalC } };
-}
-
-// ── Save resource ─────────────────────────────────────────────────────────────
-async function pracSaveResource() {
-  var editId = document.getElementById('prac-res-edit-id').value;
-  var name   = document.getElementById('prac-res-name').value.trim();
-  var track  = document.getElementById('prac-res-track').value;
-  var due    = document.getElementById('prac-res-due').value;
-  var notes  = document.getElementById('prac-res-notes').value;
-
-  if (!name)  { showToast('Name is required'); return; }
-  if (!track) { showToast('Track is required'); return; }
-
-  var btn = document.getElementById('prac-res-save-btn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-
-  try {
-    if (editId) {
-      await api.call('updatePracticeEntry', editId, { name: name, track: track, dueDate: due, notes: notes });
-      showToast('Resource updated ✓');
-    } else {
-      await api.call('addPracticeResource', { name: name, track: track, dueDate: due, notes: notes });
-      showToast('Resource added ✓');
     }
-    closeModals();
-    _pracLoaded = false;
-    await pracLoad();
-  } catch (e) {
-    showToast('Error: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = editId ? 'Save changes' : 'Add resource';
   }
+  return null;
 }
-
-// ── Edit resource (opens modal pre-filled) ────────────────────────────────────
-function pracEditResource(resId) {
-  var res = _pracData.find(function(r) { return r.id === resId; });
-  if (!res) return;
-
-  document.getElementById('prac-res-edit-id').value = res.id;
-  document.getElementById('prac-res-name').value    = res.name;
-  document.getElementById('prac-res-track').value   = res.track;
-  document.getElementById('prac-res-due').value     = res.dueDate || '';
-  document.getElementById('prac-res-notes').value   = res.notes || '';
-  document.getElementById('prac-res-modal-title').textContent = 'Edit resource';
-  document.getElementById('prac-res-save-btn').textContent    = 'Save changes';
-  openModal('modal-prac-resource');
+function _modIcon(n,dn) {
+  if(dn)return'\u2705';
+  var l=(n||'').toLowerCase();
+  if(l.indexOf('listen')!==-1)return'\uD83C\uDFA7';
+  if(l.indexOf('read')!==-1)return'\uD83D\uDCD6';
+  if(l.indexOf('writ')!==-1)return'\u270D\uFE0F';
+  if(l.indexOf('speak')!==-1)return'\uD83D\uDDE3\uFE0F';
+  return'\uD83D\uDCC2';
 }
-
-// ── Delete resource ───────────────────────────────────────────────────────────
-async function pracDeleteResource(resId, name) {
-  if (!confirm('Delete "' + name + '" and all its items?')) return;
-  try {
-    await api.call('deletePracticeEntry', resId);
-    showToast('Deleted ✓');
-    _pracLoaded = false;
-    await pracLoad();
-  } catch (e) {
-    showToast('Error: ' + e.message);
-  }
-}
-
-// ── Batch add items ───────────────────────────────────────────────────────────
-function pracOpenBatchAdd(resId, resName) {
-  _pracBatchParent = resId;
-  document.getElementById('prac-items-parent-lbl').textContent = 'to: ' + resName;
-  document.getElementById('prac-items-text').value = '';
-  document.getElementById('prac-items-due').value  = '';
-  openModal('modal-prac-items');
-  setTimeout(function() { document.getElementById('prac-items-text').focus(); }, 100);
-}
-
-async function pracSaveItemsBatch() {
-  var text = document.getElementById('prac-items-text').value;
-  var due  = document.getElementById('prac-items-due').value;
-  var names = text.split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
-
-  if (names.length === 0) { showToast('Enter at least one item'); return; }
-
-  var dueDates = due ? names.map(function() { return due; }) : null;
-
-  try {
-    var res = await api.call('addPracticeItemsBatch', {
-      parentId: _pracBatchParent,
-      names: names,
-      dueDates: dueDates
-    });
-    showToast(res.count + ' items added ✓');
-    closeModals();
-    _pracLoaded = false;
-    await pracLoad();
-  } catch (e) {
-    showToast('Error: ' + e.message);
-  }
-}
-
-// ── Inline add (single item, quick) ──────────────────────────────────────────
-function pracStartInlineAdd(btn, resId) {
-  var row = btn.parentElement;
-  row.innerHTML =
-    '<div class="prac-inline-add">' +
-    '<input type="text" id="prac-inline-name" placeholder="Item name" autofocus>' +
-    '<input type="date" id="prac-inline-due">' +
-    '<button class="btn btn--primary btn--sm" onclick="pracInlineSave(\'' + resId + '\')">Add</button>' +
-    '<button class="btn btn--ghost btn--sm" onclick="pracLoad()">✕</button>' +
-    '</div>';
-  setTimeout(function() {
-    var inp = document.getElementById('prac-inline-name');
-    if (inp) inp.focus();
-    // Enter key support
-    inp.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') pracInlineSave(resId);
-    });
-  }, 50);
-}
-
-async function pracInlineSave(resId) {
-  var name = document.getElementById('prac-inline-name').value.trim();
-  var due  = document.getElementById('prac-inline-due').value;
-  if (!name) { showToast('Name is required'); return; }
-
-  try {
-    await api.call('addPracticeItem', { parentId: resId, name: name, dueDate: due });
-    showToast('Item added ✓');
-    _pracLoaded = false;
-    await pracLoad();
-  } catch (e) {
-    showToast('Error: ' + e.message);
-  }
-}
-
-// ── Edit item modal ───────────────────────────────────────────────────────────
-function pracOpenEditItem(itemId) {
-  var item = null;
-  _pracData.forEach(function(res) {
-    (res.items || []).forEach(function(it) {
-      if (it.id === itemId) item = it;
-    });
-  });
-  if (!item) return;
-
-  document.getElementById('prac-edit-item-id').value    = item.id;
-  document.getElementById('prac-edit-item-name').value  = item.name;
-  document.getElementById('prac-edit-item-due').value   = item.dueDate || '';
-  document.getElementById('prac-edit-item-notes').value = item.notes || '';
-  openModal('modal-prac-edit-item');
-}
-
-async function pracSaveItemEdit() {
-  var id    = document.getElementById('prac-edit-item-id').value;
-  var name  = document.getElementById('prac-edit-item-name').value.trim();
-  var due   = document.getElementById('prac-edit-item-due').value;
-  var notes = document.getElementById('prac-edit-item-notes').value;
-
-  if (!name) { showToast('Name is required'); return; }
-
-  try {
-    await api.call('updatePracticeEntry', id, { name: name, dueDate: due, notes: notes });
-    showToast('Updated ✓');
-    closeModals();
-    _pracLoaded = false;
-    await pracLoad();
-  } catch (e) {
-    showToast('Error: ' + e.message);
-  }
-}
-
-async function pracDeleteItem() {
-  var id = document.getElementById('prac-edit-item-id').value;
-  if (!confirm('Delete this item?')) return;
-  try {
-    await api.call('deletePracticeEntry', id);
-    showToast('Deleted ✓');
-    closeModals();
-    _pracLoaded = false;
-    await pracLoad();
-  } catch (e) {
-    showToast('Error: ' + e.message);
-  }
-}
-
-// ── Date helpers ──────────────────────────────────────────────────────────────
-function _pracDueClass(dateStr) {
-  if (!dateStr) return 'none';
-  var d = new Date(dateStr);
-  if (isNaN(d.getTime())) return 'none';
-  var today = new Date(); today.setHours(0,0,0,0);
-  d.setHours(0,0,0,0);
-  return d < today ? 'overdue' : 'upcoming';
-}
-
-function _pracFmtDue(dateStr) {
-  if (!dateStr) return '';
-  var d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  var today = new Date(); today.setHours(0,0,0,0);
-  d.setHours(0,0,0,0);
-  var diff = Math.round((d - today) / 86400000);
-  if (diff === 0) return 'today';
-  if (diff === 1) return 'tomorrow';
-  if (diff === -1) return 'yesterday';
-  if (diff < -1) return Math.abs(diff) + 'd overdue';
-  if (diff <= 7) return 'in ' + diff + 'd';
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
-// ── Reset modal on close (hook into existing closeModals) ─────────────────────
-var _origCloseModals = typeof closeModals === 'function' ? closeModals : null;
-// We'll reset fields when the resource modal closes
-document.addEventListener('click', function(e) {
-  if (e.target.classList && e.target.classList.contains('modal-backdrop')) {
-    // Reset resource modal
-    document.getElementById('prac-res-edit-id').value = '';
-    document.getElementById('prac-res-name').value    = '';
-    document.getElementById('prac-res-track').value   = '';
-    document.getElementById('prac-res-due').value     = '';
-    document.getElementById('prac-res-notes').value   = '';
-    document.getElementById('prac-res-modal-title').textContent = 'Add practice resource';
-    document.getElementById('prac-res-save-btn').textContent    = 'Add resource';
-  }
-});
+function _dueClass(d){if(!d)return'';var x=new Date(d);x.setHours(0,0,0,0);var t=new Date();t.setHours(0,0,0,0);return x<t?'overdue':'upcoming';}
+function _dueLabel(d){if(!d)return'';var x=new Date(d);x.setHours(0,0,0,0);var t=new Date();t.setHours(0,0,0,0);var df=Math.round((x-t)/864e5);if(df<0)return Math.abs(df)+'d overdue';if(df===0)return'Due today';if(df===1)return'Tomorrow';return'Due '+d;}
+function _esc(s){return(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 </script>
