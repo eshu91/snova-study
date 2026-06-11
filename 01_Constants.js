@@ -96,6 +96,7 @@ const COL_CTR = {
 };
 
 const PRAC_TYPE_BOOK    = 'book';
+const PRAC_TYPE_TEST    = 'test';
 const PRAC_TYPE_MODULE  = 'module';
 const PRAC_TYPE_SECTION = 'section';
 

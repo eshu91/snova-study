@@ -288,35 +288,18 @@ function sendMorningBriefing_(config) {
 }
  
 
-/**
- * Renders a small table of practice items for the email.
- * Each item shows: icon (by type), name, track, due date.
- * 
- * REPLACE the existing _pracItemTable_ in 08_Email.js with this version.
- */
 function _pracItemTable_(items, bgColor, borderColor, textColor) {
   var html = '<div style="background:' + bgColor + ';border-radius:8px;border:0.5px solid ' + borderColor + ';overflow:hidden">';
   items.forEach(function(it, idx) {
     var border = idx > 0 ? 'border-top:0.5px solid ' + borderColor + ';' : '';
-
-    // Icon based on type (was: resource → 📁, item → ☐)
-    var typeIcon = '☐';
-    if (it.type === PRAC_TYPE_BOOK)   typeIcon = '📖';
-    if (it.type === PRAC_TYPE_MODULE) typeIcon = '📂';
-
+    var icons = { book: '\uD83D\uDCD6', test: '\uD83D\uDCDD', module: '\uD83D\uDCC2', section: '\u2610' };
+    var typeIcon = icons[it.type] || '\u2610';
     var trackLabel = it.track
       ? '<span style="font-size:10px;color:' + textColor + ';opacity:.7;margin-left:6px">' + _esc_(it.track) + '</span>'
       : '';
-
-    // Show parent context for sections
-    var parentLabel = '';
-    if (it.type === PRAC_TYPE_SECTION && it.parentName) {
-      parentLabel = '<span style="font-size:10px;color:' + textColor + ';opacity:.5;margin-left:4px">(' + _esc_(it.parentName) + ')</span>';
-    }
-
     html += '<div style="display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;' + border + '">';
     html += '<span style="flex-shrink:0">' + typeIcon + '</span>';
-    html += '<span style="flex:1;color:#1c1a17">' + _esc_(it.name) + parentLabel + trackLabel + '</span>';
+    html += '<span style="flex:1;color:#1c1a17">' + _esc_(it.name) + trackLabel + '</span>';
     if (it.dueDate) {
       html += '<span style="font-size:11px;color:' + textColor + ';font-weight:500;white-space:nowrap">' + _fmtDueLabel_(it.dueDate) + '</span>';
     }
@@ -325,7 +308,9 @@ function _pracItemTable_(items, bgColor, borderColor, textColor) {
   html += '</div>';
   return html;
 }
- 
+
+
+
 /**
  * Formats a due date into a human label for emails.
  */
