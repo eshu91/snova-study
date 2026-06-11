@@ -143,6 +143,7 @@ const CONFIG_DEFAULTS = {
   owner_email:              '',
   collaborator_email:       '',
   notification_email:       '',
+  allowed_emails:           '', 
   timezone:                 'Asia/Kathmandu',
   phase:                    PHASE_PRE_IELTS,
   ielts_test_date:          '2026-09-17',

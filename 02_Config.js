@@ -67,3 +67,46 @@ function getDaysUntilIELTS() {
   if (!d) return null;
   return Math.round((d.getTime() - Date.now()) / 86400000);
 }
+
+
+// ── Access control ───────────────────────────────────────────────────────────
+
+/**
+ * Returns true if the current user is allowed to use the app.
+ * Allowed = owner OR collaborator OR in the allowed_emails list.
+ */
+function isCurrentUserAllowed() {
+  const email = getCurrentUserEmail_();
+  if (!email) return false;                       // can't identify → block
+  const owner  = getConfig('owner_email');
+  const collab = getConfig('collaborator_email');
+  if (email === owner || email === collab) return true;
+  const allowed = getAllowedEmails();
+  return allowed.includes(email);
+}
+
+/** Parse the comma-separated allowed_emails config into a clean array. */
+function getAllowedEmails() {
+  const raw = getConfig('allowed_emails');
+  if (!raw) return [];
+  return raw.split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+}
+
+/** Add an email to the allowlist. Returns the updated list. */
+function addAllowedEmail(email) {
+  email = String(email).trim().toLowerCase();
+  if (!email || !email.includes('@')) return { error: 'Invalid email address' };
+  const list = getAllowedEmails();
+  if (list.includes(email)) return { emails: list };   // already there
+  list.push(email);
+  setConfigValue('allowed_emails', list.join(','));
+  return { emails: list };
+}
+
+/** Remove an email from the allowlist. Returns the updated list. */
+function removeAllowedEmail(email) {
+  email = String(email).trim().toLowerCase();
+  const list = getAllowedEmails().filter(e => e !== email);
+  setConfigValue('allowed_emails', list.join(','));
+  return { emails: list };
+}

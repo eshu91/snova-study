@@ -1,4 +1,20 @@
 function doGet() {
+  // ── Access gate ──────────────────────────────────────────────────────────
+  if (!isCurrentUserAllowed()) {
+    var userEmail = getCurrentUserEmail_() || 'unknown';
+    return HtmlService.createHtmlOutput(
+      '<div style="font-family:system-ui,sans-serif;max-width:420px;margin:80px auto;' +
+      'text-align:center;padding:24px;color:#555">' +
+      '<div style="font-size:40px;margin-bottom:16px">🔒</div>' +
+      '<h2 style="margin:0 0 8px;color:#222;font-size:20px">Access restricted</h2>' +
+      '<p style="font-size:14px;line-height:1.5;margin:0 0 20px">' +
+      'This study tracker is private. Your account ' +
+      '<strong>' + userEmail + '</strong> doesn\'t have access.</p>' +
+      '<p style="font-size:13px;color:#888">Ask the owner to add your email in Settings → Access control.</p>' +
+      '</div>'
+    ).setTitle('Access Denied');
+  }
+
   try {
     const tmpl  = HtmlService.createTemplateFromFile('index');
     const cfg   = getConfigAll();

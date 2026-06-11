@@ -16,7 +16,19 @@
         <div class="settings-row"><div><div class="srow-lbl">Notification email</div><div class="srow-sub">where nudges are sent</div></div><input class="srow-in" type="email" id="cfg-notif-email"></div>
       </div>
       <button class="btn btn--primary btn--sm" style="margin-top:10px" onclick="saveProfile()">Save profile</button>
-
+  <div class="sec-label">access control</div>
+      <div class="card" style="padding:0;overflow:hidden" id="acl-card">
+        <div id="acl-list" style="min-height:40px">
+          <div class="settings-row"><span style="font-size:12px;color:var(--ink3)">Loading…</span></div>
+        </div>
+        <div style="border-top:0.5px solid var(--border);padding:10px 14px;display:flex;gap:8px">
+          <input class="srow-in" type="email" id="acl-new-email" placeholder="name@gmail.com" style="flex:1">
+          <button class="btn btn--primary btn--sm" style="height:34px;white-space:nowrap" onclick="aclAdd()">Add</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:6px">
+        Owner and collaborator emails always have access. Add extra accounts here.
+      </div>
       <div class="sec-label">subjects / workspaces</div>
       <div class="card" style="padding:0;overflow:hidden">
         <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid var(--border)">
@@ -272,4 +284,48 @@ async function testLLM() {
     r.textContent = '✗ ' + e.message; r.style.color = 'var(--red)';
   }
 }
+
+// ── Access control ───────────────────────────────────────────────────────────
+async function aclLoad() {
+  try {
+    const emails = await api.call('getAllowedEmails');
+    renderAclList(emails);
+  } catch (e) { /* silent */ }
+}
+
+function renderAclList(emails) {
+  const list = document.getElementById('acl-list');
+  if (!emails || emails.length === 0) {
+    list.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--ink3)">No extra accounts added. Only owner and collaborator can access.</div>';
+    return;
+  }
+  list.innerHTML = emails.map(email => `
+    <div class="settings-row" style="min-height:40px">
+      <div style="font-size:13px">${email}</div>
+      <button class="btn btn--ghost btn--sm" style="color:var(--red,#d44);height:28px;padding:0 10px;font-size:11px"
+              onclick="aclRemove('${email}')">remove</button>
+    </div>`).join('');
+}
+
+async function aclAdd() {
+  const input = document.getElementById('acl-new-email');
+  const email = input.value.trim();
+  if (!email) return;
+  try {
+    const result = await api.call('addAllowedEmail', email);
+    if (result.error) { showToast(result.error); return; }
+    renderAclList(result.emails);
+    input.value = '';
+    showToast('Access granted to ' + email);
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+
+async function aclRemove(email) {
+  try {
+    const result = await api.call('removeAllowedEmail', email);
+    renderAclList(result.emails);
+    showToast(email + ' removed');
+  } catch (e) { showToast('Error: ' + e.message); }
+}
+aclLoad();
 </script>
